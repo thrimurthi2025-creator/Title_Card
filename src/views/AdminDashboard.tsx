@@ -105,7 +105,11 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
     setFetchingInfo(true);
     setError(null);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Gemini API Key is missing. Please set VITE_GEMINI_API_KEY in Vercel.");
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: `Find information about the movie "${title}". Provide the release year, total duration (e.g. 2h 43m), IMDB rating (0-10), a brief overview (max 200 chars), and primary genre.`,
