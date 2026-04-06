@@ -137,14 +137,18 @@ export function Feed() {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-sm text-white/60 leading-relaxed">
-                  <p>
-                    Title card: <span className="bg-white/10 text-white px-2 py-0.5 rounded font-bold ml-1">{movie.titleCardTime}</span>
-                  </p>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/60 leading-relaxed">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Title card at</span>
+                    <span className="bg-gradient-to-r from-pink-500 to-violet-500 text-white px-3 py-1 rounded-full font-black text-base shadow-[0_0_15px_rgba(236,72,153,0.3)] border border-white/20">
+                      {movie.titleCardTime}
+                    </span>
+                  </div>
                   {movie.totalDuration && (
-                    <p>
-                      Duration: <span className="text-white font-mono">{movie.totalDuration}</span>
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Duration</span>
+                      <span className="text-white font-mono font-bold">{movie.totalDuration}</span>
+                    </div>
                   )}
                 </div>
               </div>

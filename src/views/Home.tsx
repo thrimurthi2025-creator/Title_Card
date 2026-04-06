@@ -168,10 +168,6 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-3xl mx-auto text-center space-y-6 py-8 sm:py-12"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-          <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Now Live</span>
-        </div>
         <h1 className="text-4xl sm:text-6xl font-black tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/20">
           Never Miss a <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">Title Card</span> Again.

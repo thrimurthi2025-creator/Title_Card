@@ -35,7 +35,7 @@ function Navigation({ isAdmin }: { isAdmin: boolean }) {
   );
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-[#1A1525]/90 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform duration-300">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white/5 backdrop-blur-[32px] border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] transition-transform duration-300 before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-white/10 before:to-transparent before:pointer-events-none overflow-hidden">
       <NavItem to="/" icon={<HomeIcon className="w-5 h-5" />} label="HOME" active={path === '/'} />
       {!isAdmin && (
         <NavItem to="/feed" icon={<Layers className="w-5 h-5" />} label="FEED" active={path === '/feed'} />
@@ -63,8 +63,8 @@ function Header({ user, showAdminLogin, handleTitleClick }: { user: User | null,
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0B0914]/80 backdrop-blur-xl border-b border-white/5">
-      <div className="max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-6 py-4 flex justify-between items-center">
+    <header className="sticky top-0 z-40 bg-white/[0.03] backdrop-blur-[32px] border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/5 before:to-transparent before:pointer-events-none">
+      <div className="max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-6 py-4 flex justify-between items-center relative z-10">
         <div className="flex items-center gap-3">
         {user?.photoURL && !isSearchOpen && (
           <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 shrink-0">
