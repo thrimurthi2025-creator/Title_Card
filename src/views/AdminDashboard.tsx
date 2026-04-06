@@ -304,15 +304,15 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <div className="mb-6 flex items-start justify-between">
+    <div className="p-4 sm:p-6">
+      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-blue-200 mb-2">Admin Dashboard</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-blue-200 mb-2">Admin Dashboard</h2>
           <p className="text-[#8A94A6] text-lg leading-tight">Manage cinematic moments.</p>
         </div>
         <button 
           onClick={() => logOut()}
-          className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-full transition-colors"
+          className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-full transition-colors self-end sm:self-auto"
           title="Logout"
         >
           <LogOut className="w-5 h-5" />
@@ -376,91 +376,155 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
           >
           
           {/* Upload Area */}
-          <div 
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full aspect-[4/3] bg-gradient-to-br from-[#2A2438] to-[#1A1525] rounded-[3rem] flex flex-col items-center justify-center cursor-pointer hover:opacity-90 transition-opacity overflow-hidden relative shadow-2xl"
-          >
-            {image ? (
-              <img src={image} alt="Preview" className="w-full h-full object-cover opacity-80" />
-            ) : (
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-[#3A4B5C] rounded-full flex items-center justify-center mb-4 shadow-lg">
-                  <Clapperboard className="w-8 h-8 text-white/40" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full aspect-[4/3] bg-gradient-to-br from-[#2A2438] to-[#1A1525] rounded-[2.5rem] sm:rounded-[3rem] flex flex-col items-center justify-center cursor-pointer hover:opacity-90 transition-opacity overflow-hidden relative shadow-2xl"
+            >
+              {image ? (
+                <img src={image} alt="Preview" className="w-full h-full object-cover opacity-80" />
+              ) : (
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 bg-[#3A4B5C] rounded-full flex items-center justify-center mb-4 shadow-lg">
+                    <Clapperboard className="w-8 h-8 text-white/40" />
+                  </div>
+                  <span className="text-white font-bold text-lg mb-1">Drop frame or browse</span>
+                  <span className="text-[#8A94A6] text-sm">Supports HEIF, PNG up to 50MB</span>
                 </div>
-                <span className="text-white font-bold text-lg mb-1">Drop frame or browse</span>
-                <span className="text-[#8A94A6] text-sm">Supports HEIF, PNG up to 50MB</span>
-              </div>
-            )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              accept="image/*"
-              className="hidden"
-            />
-          </div>
-
-          {/* Inputs */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10">
-              <input 
-                type="checkbox" 
-                id="isFeatured"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="w-5 h-5 rounded border-white/20 bg-white/10 text-white focus:ring-white/20"
+              )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
               />
-              <label htmlFor="isFeatured" className="text-sm font-bold text-white/80 cursor-pointer">
-                Feature on Home Screen
-              </label>
             </div>
 
-            {isFeatured && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="space-y-6 overflow-hidden"
-              >
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Genre</label>
-                    <input
-                      type="text"
-                      value={genre}
-                      onChange={(e) => setGenre(e.target.value)}
-                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
-                      placeholder="e.g. Action, Sci-Fi"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Rating (0-10)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={rating}
-                      onChange={(e) => setRating(e.target.value)}
-                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
-                      placeholder="8.5"
-                    />
-                  </div>
-                </div>
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10">
+                <input 
+                  type="checkbox" 
+                  id="isFeatured"
+                  checked={isFeatured}
+                  onChange={(e) => setIsFeatured(e.target.checked)}
+                  className="w-5 h-5 rounded border-white/20 bg-white/10 text-white focus:ring-white/20"
+                />
+                <label htmlFor="isFeatured" className="text-sm font-bold text-white/80 cursor-pointer">
+                  Feature on Home Screen
+                </label>
+              </div>
 
+              <div className="space-y-2">
+                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Movie Title</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 pr-14 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                    placeholder="e.g. Blade Runner 2049"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={fetchMovieInfo}
+                    disabled={fetchingInfo || !title}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all disabled:opacity-50"
+                    title="Auto-fill details using AI"
+                  >
+                    {fetchingInfo ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Description</label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-[#7A7488]/20 border-none rounded-3xl py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all min-h-[100px]"
-                    placeholder="Brief movie summary..."
+                  <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Release Year</label>
+                  <input
+                    type="text"
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                    placeholder="2017"
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Title card</label>
+                  <input
+                    type="text"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                    placeholder="01:42:05"
+                    required
+                  />
+                </div>
+              </div>
 
-                <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Total Duration</label>
+                <input
+                  type="text"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                  placeholder="e.g. 2h 43m"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Featured Details */}
+          {isFeatured && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="space-y-8 overflow-hidden"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Genre</label>
+                      <input
+                        type="text"
+                        value={genre}
+                        onChange={(e) => setGenre(e.target.value)}
+                        className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+                        placeholder="e.g. Action, Sci-Fi"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Rating (0-10)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={rating}
+                        onChange={(e) => setRating(e.target.value)}
+                        className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+                        placeholder="8.5"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Poster Image (Vertical)</label>
+                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Description</label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full bg-[#7A7488]/20 border-none rounded-3xl py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all min-h-[150px]"
+                      placeholder="Brief movie summary..."
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Poster (Vertical)</label>
                     <div 
                       onClick={() => posterInputRef.current?.click()}
-                      className="w-full aspect-[4/5] bg-[#7A7488]/10 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#7A7488]/20 transition-all overflow-hidden relative"
+                      className="w-full aspect-[2/3] bg-[#7A7488]/10 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#7A7488]/20 transition-all overflow-hidden relative"
                     >
                       {posterImage ? (
                         <img src={posterImage} alt="Poster" className="w-full h-full object-cover" />
@@ -470,18 +534,12 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                           <span className="text-[10px] text-white/40 font-bold uppercase">Upload Poster</span>
                         </div>
                       )}
-                      <input
-                        type="file"
-                        ref={posterInputRef}
-                        onChange={(e) => handleImageUpload(e, 'poster')}
-                        accept="image/*"
-                        className="hidden"
-                      />
+                      <input type="file" ref={posterInputRef} onChange={(e) => handleImageUpload(e, 'poster')} accept="image/*" className="hidden" />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Backdrop Image (Horizontal)</label>
+                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Backdrop (Horizontal)</label>
                     <div 
                       onClick={() => backdropInputRef.current?.click()}
                       className="w-full aspect-video bg-[#7A7488]/10 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#7A7488]/20 transition-all overflow-hidden relative"
@@ -494,89 +552,27 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                           <span className="text-[10px] text-white/40 font-bold uppercase">Upload Backdrop</span>
                         </div>
                       )}
-                      <input
-                        type="file"
-                        ref={backdropInputRef}
-                        onChange={(e) => handleImageUpload(e, 'backdrop')}
-                        accept="image/*"
-                        className="hidden"
-                      />
+                      <input type="file" ref={backdropInputRef} onChange={(e) => handleImageUpload(e, 'backdrop')} accept="image/*" className="hidden" />
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            )}
-
-            <div className="space-y-2">
-              <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Movie Title</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 pr-14 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
-                  placeholder="e.g. Blade Runner 2049"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={fetchMovieInfo}
-                  disabled={fetchingInfo || !title}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all disabled:opacity-50"
-                  title="Auto-fill details using AI"
-                >
-                  {fetchingInfo ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
-                </button>
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Release Year</label>
-                <input
-                  type="text"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
-                  placeholder="2017"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Title card</label>
-                <input
-                  type="text"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
-                  placeholder="01:42:05"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Total Duration</label>
-              <input
-                type="text"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
-                placeholder="e.g. 2h 43m"
-              />
-            </div>
-          </div>
+            </motion.div>
+          )}
 
           {/* Submit Button */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={loading}
-            className="w-full py-5 bg-white hover:bg-gray-100 text-[#0B0914] rounded-full font-bold text-xl shadow-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
-          >
-            {loading ? (editingId ? 'Updating...' : 'Publishing...') : (editingId ? 'Update Moment' : 'Publish Moment')}
-            {!loading && <Rocket className="w-6 h-6" />}
-          </motion.button>
+          <div className="pt-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={loading}
+              className="w-full py-5 bg-white hover:bg-gray-100 text-[#0B0914] rounded-full font-bold text-xl shadow-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+            >
+              {loading ? (editingId ? 'Updating...' : 'Publishing...') : (editingId ? 'Update Moment' : 'Publish Moment')}
+              {!loading && <Rocket className="w-6 h-6" />}
+            </motion.button>
+          </div>
           
           {editingId && (
             <button
@@ -616,7 +612,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                   transition: { staggerChildren: 0.05 }
                 }
               }}
-              className="space-y-4"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               {movies.map((movie) => (
                 <motion.div 
@@ -625,7 +621,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                     hidden: { opacity: 0, x: -20 },
                     visible: { opacity: 1, x: 0 }
                   }}
-                  className="bg-[#1A1525] p-4 rounded-3xl border border-white/5 flex gap-4 items-center shadow-lg"
+                  className="bg-[#1A1525] p-4 rounded-3xl border border-white/5 flex gap-4 items-center shadow-lg hover:border-white/10 transition-colors"
                 >
                 <div className="w-20 h-20 bg-black rounded-2xl overflow-hidden shrink-0">
                   {movie.image ? (

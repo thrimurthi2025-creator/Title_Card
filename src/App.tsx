@@ -35,7 +35,7 @@ function Navigation({ isAdmin }: { isAdmin: boolean }) {
   );
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-[#1A1525]/80 backdrop-blur-xl border border-white/10 shadow-2xl">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-[#1A1525]/90 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform duration-300">
       <NavItem to="/" icon={<HomeIcon className="w-5 h-5" />} label="HOME" active={path === '/'} />
       {!isAdmin && (
         <NavItem to="/feed" icon={<Layers className="w-5 h-5" />} label="FEED" active={path === '/feed'} />
@@ -206,14 +206,14 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#0B0914] text-white font-sans pb-28 selection:bg-white/10 relative">
+      <div className="min-h-screen bg-[#0B0914] text-white font-sans pb-32 selection:bg-white/10 relative overflow-x-hidden">
         {/* Neutral dark background */}
-        <div className="absolute inset-0 bg-[#0B0914] pointer-events-none"></div>
+        <div className="fixed inset-0 bg-[#0B0914] -z-10"></div>
         
-        <div className="relative z-10">
+        <div className="relative z-10 flex flex-col min-h-screen">
           <Header user={user} showAdminLogin={showAdminLogin} handleTitleClick={handleTitleClick} />
 
-          <main className="max-w-md mx-auto sm:max-w-2xl w-full">
+          <main className="flex-1 w-full max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-6 lg:px-8">
             <AnimatedRoutes user={user} isAdmin={isAdmin} />
           </main>
 

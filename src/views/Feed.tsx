@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { SearchX } from 'lucide-react';
+import { SearchX, Clapperboard } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -79,7 +79,7 @@ export function Feed() {
         </motion.div>
       ) : (
         <motion.div 
-          className="space-y-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
           initial="hidden"
           animate="visible"
           variants={{
@@ -102,11 +102,15 @@ export function Feed() {
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm overflow-hidden">
-                    {movie.authorName.charAt(0).toUpperCase()}
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-lg border border-white/10">
+                    {movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? (
+                      <Clapperboard className="w-5 h-5 text-white/90" />
+                    ) : (
+                      movie.authorName.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div>
-                    <p className="font-bold text-sm">@{movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase() === 'admin' ? 'cinephile' : movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
+                    <p className="font-bold text-sm">@{movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? 'cinephile' : movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
                     <p className="text-[10px] text-white/40 uppercase tracking-wider">
                       {formatDistanceToNow(new Date(movie.createdAt)).toUpperCase()} AGO
                     </p>
