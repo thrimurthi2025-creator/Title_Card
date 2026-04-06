@@ -3,10 +3,11 @@ import { collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc, updateD
 import { db, logOut, auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { Clapperboard, Rocket, LogOut, Trash2, Edit2, Layers, X, ExternalLink } from 'lucide-react';
+import { Clapperboard, Rocket, LogOut, Trash2, Edit2, Layers, X, ExternalLink, Search, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { GoogleGenAI, Type } from "@google/genai";
 
 enum OperationType {
   CREATE = 'create',
@@ -79,6 +80,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
   const [genre, setGenre] = useState('');
   const [rating, setRating] = useState('');
   const [description, setDescription] = useState('');
+  const [fetchingInfo, setFetchingInfo] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const posterInputRef = useRef<HTMLInputElement>(null);
@@ -97,6 +99,47 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
     });
     return () => unsubscribe();
   }, [isAdmin]);
+
+  const fetchMovieInfo = async () => {
+    if (!title) return;
+    setFetchingInfo(true);
+    setError(null);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Find information about the movie "${title}". Provide the release year, total duration (e.g. 2h 43m), IMDB rating (0-10), a brief overview (max 200 chars), and primary genre.`,
+        config: {
+          tools: [{ googleSearch: {} }],
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              year: { type: Type.STRING },
+              duration: { type: Type.STRING },
+              rating: { type: Type.STRING },
+              description: { type: Type.STRING },
+              genre: { type: Type.STRING },
+            },
+            required: ["year", "duration", "rating", "description", "genre"],
+          },
+        },
+      });
+
+      const data = JSON.parse(response.text);
+      setYear(data.year || '');
+      setDuration(data.duration || '');
+      setRating(data.rating || '');
+      setDescription(data.description || '');
+      setGenre(data.genre || '');
+      setIsFeatured(true);
+    } catch (err) {
+      console.error("Error fetching movie info:", err);
+      setError("Failed to fetch movie info. Please try manually.");
+    } finally {
+      setFetchingInfo(false);
+    }
+  };
 
   if (!isAdmin || !user) {
     return (
@@ -166,7 +209,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
         totalDuration: duration || null,
         image: image || null,
         authorId: user.uid,
-        authorName: user.displayName || 'Admin',
+        authorName: user.email === 'akdiljith7@gmail.com' ? 'Cinephile' : (user.displayName || 'Admin'),
         isFeatured,
         genre: isFeatured ? genre : null,
         rating: isFeatured ? parseFloat(rating) || 0 : null,
@@ -385,7 +428,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                       type="text"
                       value={genre}
                       onChange={(e) => setGenre(e.target.value)}
-                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all"
+                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
                       placeholder="e.g. Action, Sci-Fi"
                     />
                   </div>
@@ -396,7 +439,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                       step="0.1"
                       value={rating}
                       onChange={(e) => setRating(e.target.value)}
-                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all"
+                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
                       placeholder="8.5"
                     />
                   </div>
@@ -466,14 +509,25 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
 
             <div className="space-y-2">
               <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Movie Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all text-lg"
-                placeholder="e.g. Blade Runner 2049"
-                required
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 pr-14 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                  placeholder="e.g. Blade Runner 2049"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={fetchMovieInfo}
+                  disabled={fetchingInfo || !title}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all disabled:opacity-50"
+                  title="Auto-fill details using AI"
+                >
+                  {fetchingInfo ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -483,17 +537,17 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                   type="text"
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
-                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all text-lg"
+                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
                   placeholder="2017"
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Timestamp</label>
+                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Title card</label>
                 <input
                   type="text"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all text-lg"
+                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
                   placeholder="01:42:05"
                   required
                 />
@@ -506,7 +560,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                 type="text"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all text-lg"
+                className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
                 placeholder="e.g. 2h 43m"
               />
             </div>

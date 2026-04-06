@@ -262,7 +262,7 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
               >
                 <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-4 shadow-2xl border border-white/5">
                   <SafeImage 
-                    src={movie.backdropImage || movie.image} 
+                    src={movie.image} 
                     alt={movie.title} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                   />

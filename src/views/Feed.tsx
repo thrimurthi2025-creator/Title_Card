@@ -62,7 +62,7 @@ export function Feed() {
           {searchQuery ? `Search: ${searchParams.get('search')}` : 'Community Feed'}
         </h2>
         <p className="text-white/50 text-sm">
-          {searchQuery ? `Found ${filteredMovies.length} results` : 'Discover cinematic title cards curated by light.'}
+          {searchQuery ? `Found ${filteredMovies.length} results` : 'Discover cinematic title cards curated by Cinephile.'}
         </p>
       </div>
 
@@ -106,7 +106,7 @@ export function Feed() {
                     {movie.authorName.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-bold text-sm">@{movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
+                    <p className="font-bold text-sm">@{movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase() === 'admin' ? 'cinephile' : movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
                     <p className="text-[10px] text-white/40 uppercase tracking-wider">
                       {formatDistanceToNow(new Date(movie.createdAt)).toUpperCase()} AGO
                     </p>
@@ -135,7 +135,7 @@ export function Feed() {
                 </div>
                 <div className="flex items-center gap-4 text-sm text-white/60 leading-relaxed">
                   <p>
-                    Timestamp: <span className="bg-white/10 text-white px-2 py-0.5 rounded font-bold ml-1">{movie.titleCardTime}</span>
+                    Title card: <span className="bg-white/10 text-white px-2 py-0.5 rounded font-bold ml-1">{movie.titleCardTime}</span>
                   </p>
                   {movie.totalDuration && (
                     <p>
