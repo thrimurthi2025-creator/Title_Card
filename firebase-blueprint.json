@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "MovieEntry": {
+      "title": "Movie Entry",
+      "description": "A record of a movie's title card appearance",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Movie title" },
+        "titleCardTime": { "type": "string", "description": "Timestamp when the title card appears (e.g., 00:15:30)" },
+        "image": { "type": "string", "description": "Base64 encoded image or URL of the title card" },
+        "authorId": { "type": "string", "description": "UID of the user who posted" },
+        "authorName": { "type": "string", "description": "Name of the user who posted" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "titleCardTime", "authorId", "authorName", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/movies/{movieId}": {
+      "schema": { "$ref": "#/entities/MovieEntry" },
+      "description": "Collection of movie title card entries"
+    }
+  }
+}

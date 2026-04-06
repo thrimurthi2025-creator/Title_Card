@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.email == 'akdiljith7@gmail.com' && 
+             request.auth.token.email_verified == true;
+    }
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+    
+    // Domain Validators
+    function isValidMovieEntry() {
+      return hasRequiredFields(['title', 'titleCardTime', 'authorId', 'authorName', 'createdAt']) &&
+             validStringLength('title', 1, 100) &&
+             validStringLength('titleCardTime', 1, 20) &&
+             validStringLength('authorName', 1, 50) &&
+             request.resource.data.authorId == request.auth.uid &&
+             (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() <= 1048576)) &&
+             (!('releaseYear' in request.resource.data) || validStringLength('releaseYear', 1, 4)) &&
+             (!('totalDuration' in request.resource.data) || validStringLength('totalDuration', 1, 20));
+    }
+
+    match /movies/{movieId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidMovieEntry();
+      allow update: if isAdmin() && request.resource.data.authorId == resource.data.authorId && request.resource.data.authorId == request.auth.uid && isValidMovieEntry() && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+  }
+}

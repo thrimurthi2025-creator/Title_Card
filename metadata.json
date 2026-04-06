@@ -1,0 +1,5 @@
+{
+  "name": "TitleCard Tracker",
+  "description": "Track when movie title cards appear and find nearby theaters.",
+  "requestFramePermissions": ["geolocation"]
+}
