@@ -1,11 +1,63 @@
 import { useState, useRef, useEffect } from 'react';
 import { collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db, logOut } from '../lib/firebase';
+import { db, logOut, auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { Clapperboard, Rocket, LogOut, Trash2, Edit2, Layers } from 'lucide-react';
+import { Clapperboard, Rocket, LogOut, Trash2, Edit2, Layers, X, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../lib/utils';
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string;
+    email?: string | null;
+    emailVerified?: boolean;
+    isAnonymous?: boolean;
+    tenantId?: string | null;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
 
 export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: boolean }) {
   const [title, setTitle] = useState('');
@@ -13,12 +65,24 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
   const [time, setTime] = useState('');
   const [duration, setDuration] = useState('');
   const [image, setImage] = useState<string | null>(null);
+  const [posterImage, setPosterImage] = useState<string | null>(null);
+  const [backdropImage, setBackdropImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'upload' | 'manage'>('upload');
   const [movies, setMovies] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Featured fields
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [genre, setGenre] = useState('');
+  const [rating, setRating] = useState('');
+  const [description, setDescription] = useState('');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const posterInputRef = useRef<HTMLInputElement>(null);
+  const backdropInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,7 +107,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
     );
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'frame' | 'poster' | 'backdrop' = 'frame') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -52,8 +116,9 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
+        // Frame: 800x800, Poster: 600x750, Backdrop: 800x450
+        const MAX_WIDTH = type === 'frame' ? 800 : type === 'poster' ? 600 : 800;
+        const MAX_HEIGHT = type === 'frame' ? 800 : type === 'poster' ? 750 : 450;
         let width = img.width;
         let height = img.height;
 
@@ -74,8 +139,13 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
         
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-        setImage(dataUrl);
+        // Higher compression for multiple images to stay under 1MB doc limit
+        const quality = type === 'frame' ? 0.6 : 0.4;
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        
+        if (type === 'frame') setImage(dataUrl);
+        else if (type === 'poster') setPosterImage(dataUrl);
+        else if (type === 'backdrop') setBackdropImage(dataUrl);
       };
       img.src = event.target?.result as string;
     };
@@ -87,6 +157,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
     if (!title || !time) return;
 
     setLoading(true);
+    setError(null);
     try {
       const movieData = {
         title,
@@ -96,17 +167,33 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
         image: image || null,
         authorId: user.uid,
         authorName: user.displayName || 'Admin',
+        isFeatured,
+        genre: isFeatured ? genre : null,
+        rating: isFeatured ? parseFloat(rating) || 0 : null,
+        description: isFeatured ? description : null,
+        posterImage: isFeatured ? posterImage : null,
+        backdropImage: isFeatured ? backdropImage : null,
+        posterUrl: null, // Clear old URL fields
+        backdropUrl: null,
       };
 
       if (editingId) {
-        await updateDoc(doc(db, 'movies', editingId), movieData);
+        try {
+          await updateDoc(doc(db, 'movies', editingId), movieData);
+        } catch (err) {
+          handleFirestoreError(err, OperationType.UPDATE, `movies/${editingId}`);
+        }
         setEditingId(null);
         setActiveTab('manage');
       } else {
-        await addDoc(collection(db, 'movies'), {
-          ...movieData,
-          createdAt: new Date().toISOString()
-        });
+        try {
+          await addDoc(collection(db, 'movies'), {
+            ...movieData,
+            createdAt: new Date().toISOString()
+          });
+        } catch (err) {
+          handleFirestoreError(err, OperationType.CREATE, 'movies');
+        }
         setActiveTab('manage');
       }
       
@@ -116,31 +203,59 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
       setTime('');
       setDuration('');
       setImage(null);
-    } catch (error) {
-      console.error("Error saving movie:", error);
-      alert("Failed to save moment");
+      setPosterImage(null);
+      setBackdropImage(null);
+      setIsFeatured(false);
+      setGenre('');
+      setRating('');
+      setDescription('');
+    } catch (err: any) {
+      console.error("Error saving movie:", err);
+      let message = "Failed to save movie. Please check your connection.";
+      try {
+        if (err.message && err.message.includes('Missing or insufficient permissions')) {
+          message = "Permission Denied: You don't have access to perform this action.";
+        } else if (err.message && err.message.startsWith('{')) {
+          const info = JSON.parse(err.message);
+          if (info.error.includes('Missing or insufficient permissions')) {
+            message = "Permission Denied: Your admin credentials could not be verified.";
+          }
+        }
+      } catch (e) {}
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = (movie: any) => {
+    setError(null);
     setTitle(movie.title);
     setYear(movie.releaseYear || '');
     setTime(movie.titleCardTime);
     setDuration(movie.totalDuration || '');
     setImage(movie.image || null);
+    setPosterImage(movie.posterImage || null);
+    setBackdropImage(movie.backdropImage || null);
+    setIsFeatured(movie.isFeatured || false);
+    setGenre(movie.genre || '');
+    setRating(movie.rating?.toString() || '');
+    setDescription(movie.description || '');
     setEditingId(movie.id);
     setActiveTab('upload');
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this title card?')) {
+    setError(null);
+    try {
+      await deleteDoc(doc(db, 'movies', id));
+      setDeletingId(null);
+    } catch (err) {
+      console.error("Error deleting movie:", err);
       try {
-        await deleteDoc(doc(db, 'movies', id));
-      } catch (error) {
-        console.error("Error deleting movie:", error);
-        alert("Failed to delete moment");
+        handleFirestoreError(err, OperationType.DELETE, `movies/${id}`);
+      } catch (jsonErr: any) {
+        setError("Failed to delete movie: " + (jsonErr.message.includes('Missing or insufficient permissions') ? "Permission Denied" : "Server Error"));
       }
     }
   };
@@ -161,6 +276,22 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
         </button>
       </div>
 
+      <AnimatePresence>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-center justify-between"
+          >
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="p-1 hover:bg-white/5 rounded-full">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex gap-2 mb-8 bg-[#1A1525] p-1.5 rounded-full border border-white/5 relative">
         <button
           onClick={() => {
@@ -172,7 +303,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
           className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${activeTab === 'upload' ? 'text-[#0B0914]' : 'text-white/50 hover:text-white'}`}
         >
           {activeTab === 'upload' && (
-            <motion.div layoutId="activeTab" className="absolute inset-0 bg-[#00E5FF] rounded-full -z-10" />
+            <motion.div layoutId="activeTab" className="absolute inset-0 bg-white rounded-full -z-10" />
           )}
           <Clapperboard className="w-4 h-4" />
           {editingId ? 'Edit Moment' : 'Upload New'}
@@ -182,7 +313,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
           className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${activeTab === 'manage' ? 'text-[#0B0914]' : 'text-white/50 hover:text-white'}`}
         >
           {activeTab === 'manage' && (
-            <motion.div layoutId="activeTab" className="absolute inset-0 bg-[#00E5FF] rounded-full -z-10" />
+            <motion.div layoutId="activeTab" className="absolute inset-0 bg-white rounded-full -z-10" />
           )}
           <Layers className="w-4 h-4" />
           Manage Feed
@@ -211,9 +342,9 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
             ) : (
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-[#3A4B5C] rounded-full flex items-center justify-center mb-4 shadow-lg">
-                  <Clapperboard className="w-8 h-8 text-[#00E5FF]" />
+                  <Clapperboard className="w-8 h-8 text-white/40" />
                 </div>
-                <span className="text-[#00E5FF] font-bold text-lg mb-1">Drop frame or browse</span>
+                <span className="text-white font-bold text-lg mb-1">Drop frame or browse</span>
                 <span className="text-[#8A94A6] text-sm">Supports HEIF, PNG up to 50MB</span>
               </div>
             )}
@@ -228,6 +359,111 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
 
           {/* Inputs */}
           <div className="space-y-6">
+            <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10">
+              <input 
+                type="checkbox" 
+                id="isFeatured"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+                className="w-5 h-5 rounded border-white/20 bg-white/10 text-white focus:ring-white/20"
+              />
+              <label htmlFor="isFeatured" className="text-sm font-bold text-white/80 cursor-pointer">
+                Feature on Home Screen
+              </label>
+            </div>
+
+            {isFeatured && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="space-y-6 overflow-hidden"
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Genre</label>
+                    <input
+                      type="text"
+                      value={genre}
+                      onChange={(e) => setGenre(e.target.value)}
+                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all"
+                      placeholder="e.g. Action, Sci-Fi"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Rating (0-10)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={rating}
+                      onChange={(e) => setRating(e.target.value)}
+                      className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-[#00E5FF]/50 transition-all"
+                      placeholder="8.5"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Description</label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full bg-[#7A7488]/20 border-none rounded-3xl py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all min-h-[100px]"
+                    placeholder="Brief movie summary..."
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Poster Image (Vertical)</label>
+                    <div 
+                      onClick={() => posterInputRef.current?.click()}
+                      className="w-full aspect-[4/5] bg-[#7A7488]/10 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#7A7488]/20 transition-all overflow-hidden relative"
+                    >
+                      {posterImage ? (
+                        <img src={posterImage} alt="Poster" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <Layers className="w-6 h-6 text-white/20" />
+                          <span className="text-[10px] text-white/40 font-bold uppercase">Upload Poster</span>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        ref={posterInputRef}
+                        onChange={(e) => handleImageUpload(e, 'poster')}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Backdrop Image (Horizontal)</label>
+                    <div 
+                      onClick={() => backdropInputRef.current?.click()}
+                      className="w-full aspect-video bg-[#7A7488]/10 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#7A7488]/20 transition-all overflow-hidden relative"
+                    >
+                      {backdropImage ? (
+                        <img src={backdropImage} alt="Backdrop" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <Rocket className="w-6 h-6 text-white/20" />
+                          <span className="text-[10px] text-white/40 font-bold uppercase">Upload Backdrop</span>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        ref={backdropInputRef}
+                        onChange={(e) => handleImageUpload(e, 'backdrop')}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
             <div className="space-y-2">
               <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Movie Title</label>
               <input
@@ -282,7 +518,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full py-5 bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-[#0B0914] rounded-full font-bold text-xl shadow-[0_0_30px_rgba(0,229,255,0.3)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+            className="w-full py-5 bg-white hover:bg-gray-100 text-[#0B0914] rounded-full font-bold text-xl shadow-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
           >
             {loading ? (editingId ? 'Updating...' : 'Publishing...') : (editingId ? 'Update Moment' : 'Publish Moment')}
             {!loading && <Rocket className="w-6 h-6" />}
@@ -345,26 +581,57 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-lg truncate">{movie.title}</h4>
-                  <p className="text-xs text-[#00E5FF] font-mono mb-1">{movie.titleCardTime}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-bold text-lg truncate">{movie.title}</h4>
+                    {movie.isFeatured && (
+                      <span className="px-2 py-0.5 bg-white/10 text-white/60 text-[8px] font-bold rounded-full border border-white/10 uppercase tracking-widest">
+                        Featured
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-white/60 font-mono mb-1">{movie.titleCardTime}</p>
                   <p className="text-[10px] text-white/40 uppercase tracking-wider">
                     {movie.createdAt ? formatDistanceToNow(new Date(movie.createdAt), { addSuffix: true }) : 'Just now'}
                   </p>
                 </div>
-                <div className="flex flex-col gap-2 shrink-0">
-                  <button 
-                    onClick={() => handleEdit(movie)}
-                    className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4 text-white" />
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(movie.id)}
-                    className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-full transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
+                  <div className="flex flex-col gap-2 shrink-0">
+                    {deletingId === movie.id ? (
+                      <div className="flex flex-col gap-2">
+                        <button 
+                          onClick={() => handleDelete(movie.id)}
+                          className="p-2 bg-red-500 text-white rounded-full shadow-lg shadow-red-500/20"
+                          title="Confirm Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setDeletingId(null)}
+                          className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                          title="Cancel"
+                        >
+                          <X className="w-4 h-4 text-white" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={() => handleEdit(movie)}
+                          className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                        >
+                          <Edit2 className="w-4 h-4 text-white" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setError(null);
+                            setDeletingId(movie.id);
+                          }}
+                          className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-full transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </button>
+                      </>
+                    )}
+                  </div>
               </motion.div>
             ))}
             </motion.div>

@@ -10,6 +10,12 @@
         "image": { "type": "string", "description": "Base64 encoded image or URL of the title card" },
         "authorId": { "type": "string", "description": "UID of the user who posted" },
         "authorName": { "type": "string", "description": "Name of the user who posted" },
+        "isFeatured": { "type": "boolean", "description": "Whether this movie is featured on the home screen" },
+        "genre": { "type": "string", "description": "Movie genre" },
+        "rating": { "type": "number", "description": "Movie rating out of 10" },
+        "description": { "type": "string", "description": "Movie description" },
+        "posterUrl": { "type": "string", "description": "URL to the movie poster" },
+        "backdropUrl": { "type": "string", "description": "URL to the movie backdrop" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "titleCardTime", "authorId", "authorName", "createdAt"]

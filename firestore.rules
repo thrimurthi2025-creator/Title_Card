@@ -7,8 +7,8 @@ service cloud.firestore {
     }
     function isAdmin() {
       return isAuthenticated() && 
-             request.auth.token.email == 'akdiljith7@gmail.com' && 
-             request.auth.token.email_verified == true;
+             (request.auth.token.email == 'akdiljith7@gmail.com' ||
+              request.auth.uid == 'kkBfscUXJuZcSc0Yl0xLRMth1Ex1');
     }
     function hasRequiredFields(fields) {
       return request.resource.data.keys().hasAll(fields);
@@ -19,23 +19,36 @@ service cloud.firestore {
         request.resource.data[field].size() <= maxLen;
     }
     
+    function validOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) || 
+             request.resource.data[field] == null ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+    
     // Domain Validators
     function isValidMovieEntry() {
-      return hasRequiredFields(['title', 'titleCardTime', 'authorId', 'authorName', 'createdAt']) &&
-             validStringLength('title', 1, 100) &&
-             validStringLength('titleCardTime', 1, 20) &&
-             validStringLength('authorName', 1, 50) &&
-             request.resource.data.authorId == request.auth.uid &&
-             (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() <= 1048576)) &&
-             (!('releaseYear' in request.resource.data) || validStringLength('releaseYear', 1, 4)) &&
-             (!('totalDuration' in request.resource.data) || validStringLength('totalDuration', 1, 20));
+      let data = request.resource.data;
+      return hasRequiredFields(['title', 'titleCardTime', 'authorId', 'authorName']) &&
+             validStringLength('title', 1, 200) &&
+             validStringLength('titleCardTime', 1, 50) &&
+             validStringLength('authorName', 1, 100) &&
+             (data.authorId == request.auth.uid || isAdmin()) &&
+             (!( 'image' in data) || data.image == null || (data.image is string && data.image.size() <= 2097152)) &&
+             validOptionalString('releaseYear', 1, 10) &&
+             validOptionalString('totalDuration', 1, 50) &&
+             (!( 'isFeatured' in data) || data.isFeatured == null || data.isFeatured is bool) &&
+             validOptionalString('genre', 1, 100) &&
+             (!( 'rating' in data) || data.rating == null || (data.rating is number && data.rating >= 0 && data.rating <= 10)) &&
+             validOptionalString('description', 1, 2000) &&
+             validOptionalString('posterUrl', 1, 1000) &&
+             validOptionalString('backdropUrl', 1, 1000);
     }
 
     match /movies/{movieId} {
       allow read: if true;
-      allow create: if isAdmin() && isValidMovieEntry();
-      allow update: if isAdmin() && request.resource.data.authorId == resource.data.authorId && request.resource.data.authorId == request.auth.uid && isValidMovieEntry() && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
   }
 }

@@ -1,28 +1,50 @@
 import { useEffect, useState } from 'react';
-import { Play, Star, Ticket, Loader2 } from 'lucide-react';
-import { GoogleGenAI, Type } from '@google/genai';
+import { Play, Star, Ticket, Loader2, Trash2 } from 'lucide-react';
+import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Movie {
+  id: string;
   title: string;
   genre: string;
   duration: string;
   rating: number;
   description: string;
-  posterUrl?: string;
-  backdropUrl?: string;
+  posterImage?: string;
+  backdropImage?: string;
+  image?: string;
 }
-
-let cachedMoviesV4: Movie[] | null = null;
 
 function SafeImage({ src, alt, className }: { src?: string, alt: string, className?: string }) {
   const [error, setError] = useState(false);
 
+  // If src is empty or has error, we try to show nothing or a placeholder
+  // But the user wants the poster to appear. 
+  // If the URL is invalid, we can't do much except show the alt text.
+  
   if (!src || error) {
+    const isShareLink = src?.includes('share.google') || src?.includes('photos.app.goo.gl');
+    const isBookMyShow = src?.includes('bookmyshow.com');
+    
     return (
-      <div className={cn("bg-gradient-to-br from-[#2A2438] to-[#1A1525] flex items-center justify-center p-4 text-center", className)}>
-        <span className="text-white/50 font-bold text-lg">{alt}</span>
+      <div className={cn("bg-[#1A1A1A] flex items-center justify-center p-6 text-center", className)}>
+        <div className="flex flex-col items-center gap-3 max-w-[80%]">
+          <Clapperboard className="w-10 h-10 text-white/10" />
+          <div className="space-y-1">
+            <span className="block text-white/40 font-bold text-sm uppercase tracking-widest">{alt}</span>
+            {error && (
+              <span className="block text-red-400/60 text-[10px] italic leading-tight">
+                {isShareLink 
+                  ? "Google Share links are not direct images. Please use a direct link." 
+                  : isBookMyShow
+                  ? "BookMyShow page links are not direct images. Please use a direct image link."
+                  : "Image failed to load. Check the URL."}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -32,86 +54,63 @@ function SafeImage({ src, alt, className }: { src?: string, alt: string, classNa
       src={src} 
       alt={alt} 
       className={className}
-      onError={() => setError(true)}
+      onError={() => {
+        console.error(`Failed to load image: ${src}`);
+        setError(true);
+      }}
       referrerPolicy="no-referrer"
     />
   );
 }
 
-export function Home() {
-  const [movies, setMovies] = useState<Movie[]>(cachedMoviesV4 || []);
-  const [loading, setLoading] = useState(!cachedMoviesV4);
+import { Clapperboard } from 'lucide-react';
+
+export function Home({ isAdmin }: { isAdmin?: boolean }) {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
 
-  useEffect(() => {
-    if (cachedMoviesV4) return;
-
-    async function fetchLatestMovies() {
-      try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        
-        // Create a promise that rejects after 8 seconds
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Request timed out")), 8000)
-        );
-
-        const fetchPromise = ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
-          contents: `Search Google for 6 latest popular Malayalam movies currently playing in theaters right now or very recently released (Current Date: ${currentDate}). Return a JSON array of objects with title, genre, duration (e.g., "2h 15m"), rating (number out of 10), description, posterUrl (MUST be a valid, direct image URL to the official movie poster, e.g., from Wikipedia or IMDB. Ensure it ends in .jpg or .png), and backdropUrl (A valid direct image URL to a landscape scene or backdrop from the movie).`,
-          config: {
-            tools: [{ googleSearch: {} }],
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  genre: { type: Type.STRING },
-                  duration: { type: Type.STRING },
-                  rating: { type: Type.NUMBER },
-                  description: { type: Type.STRING },
-                  posterUrl: { type: Type.STRING },
-                  backdropUrl: { type: Type.STRING }
-                },
-                required: ["title", "genre", "duration", "rating", "description"]
-              }
-            }
-          }
-        });
-
-        // Race the fetch against the timeout
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as any;
-
-        let text = response.text || '[]';
-        text = text.replace(/```json/gi, '').replace(/```/gi, '').trim();
-        const data = JSON.parse(text);
-        if (data && data.length > 0) {
-          cachedMoviesV4 = data;
-          setMovies(data);
-        } else {
-          throw new Error("No data returned");
-        }
-      } catch (error) {
-        console.error("Failed to fetch movies:", error);
-        // Fallback data if API fails or rate limits
-        const fallbackData = [
-          { title: "Aavesham", genre: "Action/Comedy", duration: "2h 38m", rating: 8.9, description: "Three college students seek help from a local gangster.", posterUrl: "https://upload.wikimedia.org/wikipedia/en/6/62/Aavesham_poster.jpg", backdropUrl: "https://www.nowrunning.com/content/movie/2023/aaves-29003/bg-aavesham.jpg" },
-          { title: "Manjummel Boys", genre: "Survival Thriller", duration: "2h 15m", rating: 8.6, description: "A group of friends face a crisis at Guna Caves.", posterUrl: "https://upload.wikimedia.org/wikipedia/en/e/e0/Manjummel_Boys_poster.jpg", backdropUrl: "https://m.media-amazon.com/images/M/MV5BMTgzYjE1YTMtOTFmOC00NmQ0LWE2M2MtYjYyODQxZmQxN2M4XkEyXkFqcGdeQXVyMjkxNzQ1NDI@._V1_.jpg" },
-          { title: "Premalu", genre: "Rom-Com", duration: "2h 36m", rating: 8.3, description: "A young man's journey of love and self-discovery in Hyderabad.", posterUrl: "https://upload.wikimedia.org/wikipedia/en/1/1e/Premalu_film_poster.jpg", backdropUrl: "https://m.media-amazon.com/images/M/MV5BOGJjMzE0NjItN2M4OC00N2MwLWEwN2ItM2Q0YjFjY2RkM2Q4XkEyXkFqcGdeQXVyMjkxNzQ1NDI@._V1_.jpg" },
-          { title: "Bramayugam", genre: "Horror/Thriller", duration: "2h 19m", rating: 8.5, description: "A singer escapes slavery only to stumble upon a mysterious mansion.", posterUrl: "https://upload.wikimedia.org/wikipedia/en/7/78/Bramayugam_poster.jpg", backdropUrl: "https://upload.wikimedia.org/wikipedia/en/7/78/Bramayugam_poster.jpg" },
-          { title: "Aadujeevitham", genre: "Drama/Survival", duration: "2h 52m", rating: 8.8, description: "An Indian migrant worker is forced into slavery as a goatherd in Saudi Arabia.", posterUrl: "https://upload.wikimedia.org/wikipedia/en/df/Aadujeevitham_poster.jpg", backdropUrl: "https://upload.wikimedia.org/wikipedia/en/df/Aadujeevitham_poster.jpg" },
-          { title: "Turbo", genre: "Action/Comedy", duration: "2h 35m", rating: 7.5, description: "Jose, a jeep driver, gets into trouble and is forced to relocate to Chennai.", posterUrl: "https://upload.wikimedia.org/wikipedia/en/1/1f/Turbo_2024_poster.jpg", backdropUrl: "https://upload.wikimedia.org/wikipedia/en/1/1f/Turbo_2024_poster.jpg" }
-        ];
-        cachedMoviesV4 = fallbackData;
-        setMovies(fallbackData);
-      } finally {
-        setLoading(false);
-      }
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this movie?")) return;
+    try {
+      await deleteDoc(doc(db, 'movies', id));
+    } catch (err) {
+      console.error("Error deleting movie from home:", err);
     }
-    
-    fetchLatestMovies();
+  };
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'movies'), 
+      where('isFeatured', '==', true),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const featuredMovies: Movie[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        featuredMovies.push({
+          id: doc.id,
+          title: data.title,
+          genre: data.genre || 'Drama',
+          duration: data.totalDuration || '2h',
+          rating: data.rating || 0,
+          description: data.description || '',
+          posterImage: data.posterImage || data.image,
+          backdropImage: data.backdropImage || data.image,
+          image: data.image
+        });
+      });
+      
+      setMovies(featuredMovies);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching featured movies:", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   // Auto-advance carousel
@@ -126,8 +125,20 @@ export function Home() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-4">
-        <Loader2 className="w-10 h-10 text-[#00E5FF] animate-spin" />
-        <p className="text-[#00E5FF] font-bold tracking-widest uppercase text-xs animate-pulse">Fetching Latest Movies...</p>
+        <Loader2 className="w-10 h-10 text-white animate-spin" />
+        <p className="text-white/60 font-bold tracking-widest uppercase text-xs animate-pulse">Loading Featured Movies...</p>
+      </div>
+    );
+  }
+
+  if (movies.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] p-8 text-center space-y-4">
+        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
+          <Ticket className="w-10 h-10 text-white/20" />
+        </div>
+        <h2 className="text-2xl font-bold text-white/80">No Featured Movies</h2>
+        <p className="text-white/40 max-w-xs">The admin hasn't featured any movies on the home screen yet.</p>
       </div>
     );
   }
@@ -151,7 +162,7 @@ export function Home() {
           >
             <div className="flex items-center justify-between">
             <div>
-              <p className="text-[#00E5FF] text-xs font-bold tracking-widest uppercase mb-1">Premiering Now</p>
+              <p className="text-white/40 text-xs font-bold tracking-widest uppercase mb-1">Premiering Now</p>
               <h2 className="text-4xl font-bold tracking-tight line-clamp-1">{currentHero.title}</h2>
             </div>
             <div className="flex gap-1.5">
@@ -161,44 +172,65 @@ export function Home() {
                   onClick={() => setHeroIndex(idx)}
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
-                    idx === heroIndex ? "w-6 bg-[#00E5FF]" : "w-2 bg-white/20 hover:bg-white/40"
+                    idx === heroIndex ? "w-6 bg-white" : "w-2 bg-white/20 hover:bg-white/40"
                   )}
                 />
               ))}
             </div>
           </div>
 
-          <div className="relative w-full aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-500">
+          <div className="relative w-full aspect-[2/3] sm:aspect-[3/4] rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-500 group">
             <SafeImage 
               key={currentHero.title} // Force re-render for animation
-              src={currentHero.posterUrl} 
+              src={currentHero.posterImage} 
               alt={currentHero.title} 
-              className="w-full h-full object-cover animate-in fade-in duration-700"
+              className="w-full h-full object-cover animate-in fade-in zoom-in-95 duration-1000"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-[#0B0914]/40 to-transparent opacity-90"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-transparent to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-60"></div>
             
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-[#1A1525]/80 backdrop-blur-xl m-4 rounded-[2rem] border border-white/10">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-white/60 text-xs mb-1">{currentHero.genre} • {currentHero.duration}</p>
-                  <h3 className="text-xl font-bold line-clamp-1">{currentHero.title}</h3>
+            <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#0B0914] via-[#0B0914]/70 to-transparent pt-40">
+              <div className="flex justify-between items-end mb-4">
+                <div className="flex-1 min-w-0 pr-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-white/40 text-[10px] font-black tracking-[0.3em] uppercase">{currentHero.genre}</p>
+                    <span className="w-1 h-1 rounded-full bg-white/10" />
+                    <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">{currentHero.duration}</p>
+                  </div>
+                  <h3 className="text-3xl font-black leading-tight mb-3 tracking-tight drop-shadow-lg">{currentHero.title}</h3>
+                  {currentHero.description && (
+                    <p className="text-white/70 text-sm leading-relaxed mb-6 font-medium max-h-24 overflow-y-auto pr-2 custom-scrollbar drop-shadow-md">
+                      {currentHero.description}
+                    </p>
+                  )}
                 </div>
-                <div className="flex items-center gap-1 bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs font-bold shrink-0">
-                  <Star className="w-3 h-3 fill-current" />
-                  {currentHero.rating}
+                <div className="flex flex-col items-end gap-3 pb-1">
+                  <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-md text-white px-4 py-2 rounded-2xl text-sm font-black border border-white/10">
+                    <Star className="w-4 h-4 fill-white text-white" />
+                    {currentHero.rating}
+                  </div>
+                  {isAdmin && (
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleDelete(currentHero.id)}
+                      className="p-3 bg-red-500/10 text-red-400 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </motion.button>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <motion.a 
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  whileTap={{ scale: 0.98 }}
                   href={`https://in.bookmyshow.com/explore/movies`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 bg-[#00E5FF] text-[#0B0914] py-3 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-[#00E5FF]/90 transition-colors"
+                  className="flex-1 bg-white text-[#0B0914] py-5 rounded-[2rem] font-black text-base flex items-center justify-center gap-3 shadow-xl hover:bg-gray-100 transition-all group/btn"
                 >
-                  <Ticket className="w-5 h-5" />
-                  Book Tickets
+                  <Ticket className="w-6 h-6 transition-transform group-hover/btn:rotate-12" />
+                  GET TICKETS NOW
                 </motion.a>
               </div>
             </div>
@@ -216,30 +248,55 @@ export function Home() {
         >
           <div className="flex justify-between items-end mb-4">
             <h3 className="text-xl font-bold">Now in Theaters</h3>
-            <button className="text-[#00E5FF] text-xs font-bold tracking-widest uppercase hover:text-white transition-colors">See All</button>
+            <button className="text-white/40 text-xs font-bold tracking-widest uppercase hover:text-white transition-colors">See All</button>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
             {spotlightMovies.map((movie, idx) => (
               <motion.div 
-                key={idx} 
-                className="min-w-[280px] snap-start"
+                key={movie.id} 
+                className="min-w-[300px] snap-start group"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 + idx * 0.1 }}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -8 }}
               >
-                <div className="relative aspect-video rounded-3xl overflow-hidden mb-3 shadow-lg">
+                <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-4 shadow-2xl border border-white/5">
                   <SafeImage 
-                    src={movie.backdropUrl || movie.posterUrl} 
+                    src={movie.backdropImage || movie.image} 
                     alt={movie.title} 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                   />
-                  <div className="absolute bottom-3 left-3 bg-[#2A2438]/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-[#00E5FF] border border-white/10 uppercase tracking-wider">
-                    New Release
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
+                  
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="bg-white text-[#0B0914] px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                        {movie.rating}
+                      </div>
+                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">{movie.genre}</p>
+                    </div>
+                    <h4 className="font-black text-lg text-white leading-tight line-clamp-1">{movie.title}</h4>
                   </div>
+
+                  {isAdmin && (
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(movie.id);
+                      }}
+                      className="absolute top-4 right-4 p-2.5 bg-red-500 text-white rounded-2xl opacity-0 group-hover:opacity-100 transition-all shadow-xl"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </motion.button>
+                  )}
                 </div>
-                <h4 className="font-bold text-sm line-clamp-1 mt-1">{movie.title}</h4>
-                <p className="text-xs text-white/50">{movie.genre} • {movie.rating}/10</p>
+                {movie.description && (
+                  <p className="text-white/40 text-[11px] leading-relaxed line-clamp-2 px-1 group-hover:text-white/60 transition-colors">
+                    {movie.description}
+                  </p>
+                )}
               </motion.div>
             ))}
           </div>

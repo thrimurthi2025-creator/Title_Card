@@ -44,7 +44,7 @@ export function Feed() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-[#00E5FF]/20 border-t-[#00E5FF] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-white/10 border-t-white rounded-full animate-spin" />
       </div>
     );
   }
@@ -128,14 +128,14 @@ export function Feed() {
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="text-xl font-bold uppercase tracking-wide">{movie.title}</h3>
                   {movie.releaseYear && (
-                    <span className="px-3 py-1 bg-[#2A2438] text-[#00E5FF] text-xs font-mono rounded-full border border-white/5">
+                    <span className="px-3 py-1 bg-white/5 text-white/60 text-xs font-mono rounded-full border border-white/5">
                       {movie.releaseYear}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-white/60 leading-relaxed">
                   <p>
-                    Timestamp: <span className="bg-[#00E5FF] text-[#0B0914] px-2 py-0.5 rounded font-bold ml-1">{movie.titleCardTime}</span>
+                    Timestamp: <span className="bg-white/10 text-white px-2 py-0.5 rounded font-bold ml-1">{movie.titleCardTime}</span>
                   </p>
                   {movie.totalDuration && (
                     <p>
