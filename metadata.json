@@ -1,5 +1,5 @@
 {
-  "name": "TitleCard Tracker",
-  "description": "Track when movie title cards appear and find nearby theaters.",
+  "name": "Lumiere",
+  "description": "Lumiere tracks and notifies you exactly when movie title cards are released.",
   "requestFramePermissions": ["geolocation"]
 }
