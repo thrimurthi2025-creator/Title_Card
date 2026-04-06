@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { SearchX, Clapperboard } from 'lucide-react';
+import { SearchX, Clapperboard, Download } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -40,6 +40,25 @@ export function Feed() {
 
     return () => unsubscribe();
   }, []);
+
+  const handleDownload = async (imageUrl: string, title: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title.replace(/\s+/g, '_')}_title_card.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+      // Fallback: open in new tab if fetch fails (CORS)
+      window.open(imageUrl, '_blank');
+    }
+  };
 
   if (loading) {
     return (
@@ -116,6 +135,18 @@ export function Feed() {
                     </p>
                   </div>
                 </div>
+                {movie.image && (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleDownload(movie.image!, movie.title)}
+                    className="p-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-2xl border border-white/10 transition-all flex items-center gap-2 group"
+                    title="Download Title Card"
+                  >
+                    <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Save</span>
+                  </motion.button>
+                )}
               </div>
 
               {/* Image */}

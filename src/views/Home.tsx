@@ -219,16 +219,21 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
               {/* Title Card Time Badge */}
               {heroMovies[heroIndex].titleCardTime && (
                 <motion.div 
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                  initial={{ scale: 0.5, opacity: 0, y: 10 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ 
+                    delay: 0.5, 
+                    type: "spring", 
+                    stiffness: 260, 
+                    damping: 20 
+                  }}
                   className="absolute top-6 left-6 z-20"
                 >
                   <div className="relative group/time">
-                    <div className="absolute inset-0 bg-white/20 blur-md rounded-full animate-pulse"></div>
-                    <div className="relative flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                      <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">Title Card</span>
-                      <span className="text-xs font-black text-white tracking-wider">
+                    <div className="absolute inset-0 bg-pink-500/30 blur-xl rounded-full animate-pulse"></div>
+                    <div className="relative flex items-center gap-2 bg-gradient-to-r from-pink-500/20 to-violet-500/20 backdrop-blur-xl border border-white/30 px-5 py-2.5 rounded-full shadow-[0_8px_32px_rgba(236,72,153,0.2)]">
+                      <span className="text-[9px] font-black text-white/70 uppercase tracking-[0.2em]">Title Card</span>
+                      <span className="text-sm font-black text-white tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
                         {heroMovies[heroIndex].titleCardTime}
                       </span>
                     </div>
@@ -327,16 +332,21 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
                   {/* Title Card Time Badge */}
                   {movie.titleCardTime && (
                     <motion.div 
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.8 + idx * 0.1, type: "spring", stiffness: 200 }}
+                      initial={{ scale: 0.8, opacity: 0, y: 5 }}
+                      animate={{ scale: 1, opacity: 1, y: 0 }}
+                      transition={{ 
+                        delay: 0.8 + idx * 0.1, 
+                        type: "spring", 
+                        stiffness: 260, 
+                        damping: 20 
+                      }}
                       className="absolute top-4 left-4 z-20"
                     >
                       <div className="relative group/time">
-                        <div className="absolute inset-0 bg-white/20 blur-md rounded-full animate-pulse"></div>
-                        <div className="relative flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                        <div className="absolute inset-0 bg-pink-500/20 blur-lg rounded-full animate-pulse"></div>
+                        <div className="relative flex items-center gap-1.5 bg-gradient-to-r from-pink-500/10 to-violet-500/10 backdrop-blur-xl border border-white/20 px-3.5 py-2 rounded-full shadow-[0_4px_16px_rgba(236,72,153,0.15)]">
                           <span className="text-[7px] font-black text-white/60 uppercase tracking-widest">Title Card</span>
-                          <span className="text-[10px] font-black text-white tracking-wider">
+                          <span className="text-[11px] font-black text-white tracking-wider">
                             {movie.titleCardTime}
                           </span>
                         </div>
