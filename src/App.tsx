@@ -63,8 +63,9 @@ function Header({ user, showAdminLogin, handleTitleClick }: { user: User | null,
   };
 
   return (
-    <header className="p-6 flex justify-between items-center sticky top-0 z-40 bg-[#0B0914]/80 backdrop-blur-xl border-b border-white/5">
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-40 bg-[#0B0914]/80 backdrop-blur-xl border-b border-white/5">
+      <div className="max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center gap-3">
         {user?.photoURL && !isSearchOpen && (
           <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 shrink-0">
             <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
@@ -124,8 +125,9 @@ function Header({ user, showAdminLogin, handleTitleClick }: { user: User | null,
           </>
         )}
       </div>
-    </header>
-  );
+    </div>
+  </header>
+);
 }
 
 function PageWrapper({ children }: { children: React.ReactNode }) {

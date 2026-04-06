@@ -72,6 +72,29 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const heroMovies = movies.slice(0, 5);
+  const spotlightMovies = movies.slice(0, 3);
+
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  // Auto-play for Hero
+  useEffect(() => {
+    if (heroMovies.length <= 1) return;
+    const interval = setInterval(() => {
+      setHeroIndex(prev => (prev + 1) % heroMovies.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroMovies.length]);
+
+  const handleHeroDragEnd = (_: any, info: any) => {
+    const threshold = 50;
+    if (info.offset.x > threshold) {
+      setHeroIndex(prev => (prev - 1 + heroMovies.length) % heroMovies.length);
+    } else if (info.offset.x < -threshold) {
+      setHeroIndex(prev => (prev + 1) % heroMovies.length);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this movie?")) return;
     try {
@@ -137,47 +160,72 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
     );
   }
 
-  const heroMovies = movies.slice(0, 5);
-  const spotlightMovies = movies.slice(0, 3);
-
   return (
-    <div className="p-4 space-y-8">
+    <div className="p-4 space-y-12 sm:p-8 lg:p-12">
+      {/* Intro Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-3xl mx-auto text-center space-y-6 py-8 sm:py-12"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+          <div className="w-2 h-2 rounded-full bg-pink-500 animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Now Live</span>
+        </div>
+        <h1 className="text-4xl sm:text-6xl font-black tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/20">
+          Never Miss a <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">Title Card</span> Again.
+        </h1>
+        <p className="text-white/50 text-base sm:text-lg font-medium leading-relaxed max-w-xl mx-auto">
+          Lumiere tracks and notifies you exactly when movie title cards are released. 
+          The ultimate companion for cinephiles and collectors.
+        </p>
+      </motion.div>
+
       {/* Hero Section */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between px-1">
           <p className="text-white/40 text-xs font-bold tracking-widest uppercase">Featured Premieres</p>
           <div className="flex gap-1.5">
             {heroMovies.map((_, idx) => (
-              <div 
+              <button 
                 key={idx}
-                className="w-1.5 h-1.5 rounded-full bg-white/20"
+                onClick={() => setHeroIndex(idx)}
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                  heroIndex === idx ? "bg-white w-4" : "bg-white/20"
+                )}
               />
             ))}
           </div>
         </div>
         
-        <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar -mx-4 px-4 pb-4 scroll-smooth scroll-px-4">
-          {heroMovies.map((movie, idx) => (
+        <div className="relative aspect-[2/3] sm:aspect-[16/9] rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-[#1A1525]">
+          <AnimatePresence mode="wait">
             <motion.div 
-              key={movie.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="min-w-[85vw] sm:min-w-[450px] lg:min-w-[600px] snap-center relative aspect-[2/3] sm:aspect-[16/9] rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl group"
+              key={heroMovies[heroIndex].id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              onDragEnd={handleHeroDragEnd}
+              className="absolute inset-0 cursor-grab active:cursor-grabbing"
             >
               <SafeImage 
-                src={movie.posterImage} 
-                alt={movie.title} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                src={heroMovies[heroIndex].posterImage} 
+                alt={heroMovies[heroIndex].title} 
+                className="w-full h-full object-cover" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-transparent to-transparent opacity-80" />
               
               {/* Title Card Time Badge */}
-              {movie.titleCardTime && (
+              {heroMovies[heroIndex].titleCardTime && (
                 <motion.div 
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.8 + idx * 0.1, type: "spring", stiffness: 200 }}
+                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
                   className="absolute top-6 left-6 z-20"
                 >
                   <div className="relative group/time">
@@ -185,7 +233,7 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
                     <div className="relative flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                       <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">Title Card</span>
                       <span className="text-xs font-black text-white tracking-wider">
-                        {movie.titleCardTime}
+                        {heroMovies[heroIndex].titleCardTime}
                       </span>
                     </div>
                   </div>
@@ -196,27 +244,30 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
                 <div className="flex justify-between items-end mb-4">
                   <div className="flex-1 min-w-0 pr-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <p className="text-white/40 text-[10px] font-black tracking-[0.3em] uppercase">{movie.genre}</p>
+                      <p className="text-white/40 text-[10px] font-black tracking-[0.3em] uppercase">{heroMovies[heroIndex].genre}</p>
                       <span className="w-1 h-1 rounded-full bg-white/10" />
-                      <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">{movie.duration}</p>
+                      <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">{heroMovies[heroIndex].duration}</p>
                     </div>
-                    <h3 className="text-3xl font-black leading-tight mb-3 tracking-tight drop-shadow-lg">{movie.title}</h3>
-                    {movie.description && (
+                    <h3 className="text-3xl font-black leading-tight mb-3 tracking-tight drop-shadow-lg">{heroMovies[heroIndex].title}</h3>
+                    {heroMovies[heroIndex].description && (
                       <p className="text-white/70 text-sm leading-relaxed mb-6 font-medium max-h-24 overflow-y-auto pr-2 custom-scrollbar drop-shadow-md">
-                        {movie.description}
+                        {heroMovies[heroIndex].description}
                       </p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-3 pb-1">
                     <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-md text-white px-4 py-2 rounded-2xl text-sm font-black border border-white/10">
                       <Star className="w-4 h-4 fill-white text-white" />
-                      {movie.rating}
+                      {heroMovies[heroIndex].rating}
                     </div>
                     {isAdmin && (
                       <motion.button
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => handleDelete(movie.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(heroMovies[heroIndex].id);
+                        }}
                         className="p-3 bg-red-500/10 text-red-400 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -239,7 +290,7 @@ export function Home({ isAdmin }: { isAdmin?: boolean }) {
                 </div>
               </div>
             </motion.div>
-          ))}
+          </AnimatePresence>
         </div>
       </div>
 
