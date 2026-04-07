@@ -25,31 +25,31 @@ function Navigation({ isAdmin }: { isAdmin: boolean }) {
       to={to} 
       className={cn(
         "relative flex flex-col items-center justify-center w-20 h-16 rounded-full transition-all duration-300 z-10",
-        active ? "text-white" : "text-white/50 hover:text-white/80"
+        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
       )}
     >
       {active && (
         <motion.div
           layoutId="nav-active-indicator"
-          className="absolute inset-0 bg-gradient-to-br from-pink-500 to-violet-500 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.4)] -z-10"
+          className="absolute inset-0 bg-tertiary rounded-full shadow-pop -z-10 border-2 border-foreground"
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
       )}
       <div className="mb-1 relative z-10">{icon}</div>
-      <span className="text-[10px] font-bold tracking-wider relative z-10">{label}</span>
+      <span className="text-[10px] font-bold tracking-wider relative z-10 uppercase">{label}</span>
     </Link>
   );
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white/5 backdrop-blur-[32px] border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] transition-transform duration-300 before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-b before:from-white/10 before:to-transparent before:pointer-events-none overflow-hidden">
-      <NavItem to="/" icon={<HomeIcon className="w-5 h-5" />} label="HOME" active={path === '/'} />
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white border-2 border-foreground shadow-pop transition-transform duration-300 overflow-hidden">
+      <NavItem to="/" icon={<HomeIcon className="w-5 h-5" strokeWidth={2.5} />} label="HOME" active={path === '/'} />
       {!isAdmin && (
-        <NavItem to="/feed" icon={<Layers className="w-5 h-5" />} label="FEED" active={path === '/feed'} />
+        <NavItem to="/feed" icon={<Layers className="w-5 h-5" strokeWidth={2.5} />} label="FEED" active={path === '/feed'} />
       )}
       {isAdmin && (
-        <NavItem to="/admin" icon={<Shield className="w-5 h-5" />} label="ADMIN" active={path === '/admin'} />
+        <NavItem to="/admin" icon={<Shield className="w-5 h-5" strokeWidth={2.5} />} label="ADMIN" active={path === '/admin'} />
       )}
-      <NavItem to="/nearby" icon={<Map className="w-5 h-5" />} label="NEARBY" active={path === '/nearby'} />
+      <NavItem to="/nearby" icon={<Map className="w-5 h-5" strokeWidth={2.5} />} label="NEARBY" active={path === '/nearby'} />
     </nav>
   );
 }
@@ -70,13 +70,13 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/[0.03] backdrop-blur-[32px] border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/5 before:to-transparent before:pointer-events-none">
+    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b-2 border-foreground shadow-sm">
       <div className="max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-6 py-4 flex justify-between items-center relative z-10">
         <div className="flex items-center gap-3">
         {!isSearchOpen && (
           <motion.h1 
             whileTap={{ scale: 0.95 }}
-            className="text-2xl font-bold tracking-tight text-white cursor-pointer select-none"
+            className="text-2xl font-heading font-extrabold tracking-tight text-foreground cursor-pointer select-none"
             onClick={handleTitleClick}
           >
             Lumiere
@@ -92,36 +92,36 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search title cards..."
-              className="w-full bg-white/10 border border-white/20 rounded-full py-2 pl-4 pr-10 text-sm text-white outline-none focus:border-[#00E5FF] focus:bg-white/15 transition-all"
+              className="w-full bg-white border-2 border-foreground rounded-full py-2 pl-4 pr-10 text-sm text-foreground outline-none focus:border-accent focus:shadow-pop transition-all"
             />
             <button 
               type="button"
               onClick={() => setIsSearchOpen(false)}
-              className="absolute right-3 text-white/50 hover:text-white"
+              className="absolute right-3 text-muted-foreground hover:text-foreground"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" strokeWidth={2.5} />
             </button>
           </form>
         ) : (
           <>
             <button 
               onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-white/70 hover:bg-white/10 rounded-full transition-colors"
+              className="p-2 text-foreground hover:bg-tertiary rounded-full transition-colors border-2 border-transparent hover:border-foreground hover:shadow-pop-hover active:shadow-pop-active"
             >
-              <Search className="w-6 h-6" />
+              <Search className="w-6 h-6" strokeWidth={2.5} />
             </button>
             {user ? (
               <div className="relative">
-                <button onClick={() => setShowMenu(!showMenu)} className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+                <button onClick={() => setShowMenu(!showMenu)} className="w-10 h-10 rounded-full overflow-hidden border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all">
                   <img src={user.photoURL || ''} alt="User" className="w-full h-full object-cover" />
                 </button>
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-[#1A1525] border border-white/10 rounded-2xl p-2 shadow-xl">
-                    <Link to="/profile" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-white/80 hover:bg-white/5 rounded-xl">
-                      <UserIcon className="w-4 h-4" /> Profile
+                  <div className="absolute right-0 mt-2 w-48 bg-white border-2 border-foreground rounded-2xl p-2 shadow-pop">
+                    <Link to="/profile" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
+                      <UserIcon className="w-4 h-4" strokeWidth={2.5} /> Profile
                     </Link>
-                    <button onClick={() => { logOut(); setShowMenu(false); }} className="flex items-center gap-2 p-2 text-red-400 hover:bg-white/5 rounded-xl w-full">
-                      <LogOut className="w-4 h-4" /> Logout
+                    <button onClick={() => { logOut(); setShowMenu(false); }} className="flex items-center gap-2 p-2 text-secondary hover:bg-secondary/10 rounded-xl w-full font-bold">
+                      <LogOut className="w-4 h-4" strokeWidth={2.5} /> Logout
                     </button>
                   </div>
                 )}
@@ -129,7 +129,7 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
             ) : (
               <button 
                 onClick={onLoginClick}
-                className="text-xs font-bold text-white hover:text-white/80 transition-colors uppercase tracking-widest px-4 py-2 bg-white/10 rounded-full"
+                className="text-xs font-bold text-white hover:translate-x-[-2px] hover:translate-y-[-2px] active:translate-x-[2px] active:translate-y-[2px] transition-all uppercase tracking-widest px-6 py-3 bg-accent rounded-full border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
               >
                 Login
               </button>
@@ -142,7 +142,7 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={signInWithGoogle} 
-                  className="text-xs font-bold text-white/30 hover:text-white/50 transition-colors uppercase tracking-widest px-2"
+                  className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest px-2"
                 >
                   Admin
                 </motion.button>
@@ -153,7 +153,7 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
       </div>
     </div>
   </header>
-);
+  );
 }
 
 function PageWrapper({ children }: { children: React.ReactNode }) {
@@ -243,8 +243,8 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B0914] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-foreground border-t-accent rounded-full animate-spin" />
       </div>
     );
   }
@@ -253,9 +253,9 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#0B0914] text-white font-sans pb-32 selection:bg-white/10 relative overflow-x-hidden">
-        {/* Neutral dark background */}
-        <div className="fixed inset-0 bg-[#0B0914] -z-10"></div>
+      <div className="min-h-screen bg-background text-foreground font-sans pb-32 selection:bg-accent/20 relative overflow-x-hidden">
+        {/* Playful background with dot pattern */}
+        <div className="fixed inset-0 bg-background bg-dot-pattern -z-10"></div>
         
         <div className="relative z-10 flex flex-col min-h-screen">
           <Header user={user} showAdminLogin={showAdminLogin} handleTitleClick={handleTitleClick} onLoginClick={() => setIsLoginModalOpen(true)} />

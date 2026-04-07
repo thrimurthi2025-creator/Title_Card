@@ -10,7 +10,7 @@ export function FeedSkeleton() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-[#1A1525] rounded-[2rem] p-5 border border-white/5 space-y-4">
+          <div key={i} className="bg-white rounded-xl p-5 border-2 border-foreground shadow-pop space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -24,7 +24,7 @@ export function FeedSkeleton() {
             </div>
 
             {/* Image */}
-            <Skeleton className="aspect-[16/9] w-full rounded-2xl" />
+            <Skeleton className="aspect-[16/9] w-full rounded-lg" />
 
             {/* Details */}
             <div className="space-y-2">

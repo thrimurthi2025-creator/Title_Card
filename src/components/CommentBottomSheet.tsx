@@ -25,33 +25,33 @@ export function CommentBottomSheet({ isOpen, onClose, movieId, user, onRestricte
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50"
           />
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: '10%' }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-x-0 bottom-0 top-[10%] bg-[#1A1525] rounded-t-[2rem] z-50 flex flex-col overflow-hidden"
+            className="fixed inset-x-0 bottom-0 top-[10%] bg-white border-t-2 border-x-2 border-foreground rounded-t-[2rem] shadow-pop z-50 flex flex-col overflow-hidden"
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             onDragEnd={(_, info) => {
               if (info.offset.y > 100) onClose();
             }}
           >
-            <div className="flex items-center justify-between p-6 border-b border-white/10 bg-[#1A1525]/80 backdrop-blur-md">
-              <h2 className="text-xl font-bold tracking-tight">Comments ({commentCount})</h2>
-              <button onClick={onClose} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
-                <X className="w-5 h-5" />
+            <div className="flex items-center justify-between p-6 border-b-2 border-foreground bg-white">
+              <h2 className="text-2xl font-heading font-extrabold tracking-tight text-foreground">Comments ({commentCount})</h2>
+              <button onClick={onClose} className="p-2 bg-white border-2 border-foreground rounded-full shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all">
+                <X className="w-5 h-5 text-foreground" strokeWidth={2.5} />
               </button>
             </div>
             
             <div className="flex-1 overflow-y-auto p-6 space-y-8">
-              <div className="bg-white/5 p-5 rounded-3xl border border-white/5 shadow-inner">
+              <div className="bg-white p-5 rounded-xl border-2 border-foreground shadow-pop">
                 <Rating movieId={movieId} user={user} onRestrictedAction={onRestrictedAction} />
               </div>
               
-              <div className="h-px bg-white/10" />
+              <div className="h-0.5 bg-foreground" />
               
               <Comments movieId={movieId} user={user} onRestrictedAction={onRestrictedAction} onCountChange={setCommentCount} />
             </div>

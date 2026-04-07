@@ -74,6 +74,24 @@ service cloud.firestore {
       allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid && request.resource.data.rating == request.resource.data.rating;
     }
 
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && hasRequiredFields(['userId', 'userName', 'content', 'createdAt']) && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && hasRequiredFields(['followerId', 'followingId', 'createdAt']) && request.resource.data.followerId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.followerId == request.auth.uid;
+    }
+
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && hasRequiredFields(['userId', 'postId', 'createdAt']) && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if isOwner(userId) && hasRequiredFields(['uid', 'name', 'email', 'createdAt']);

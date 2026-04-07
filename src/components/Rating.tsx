@@ -61,14 +61,15 @@ export function Rating({ movieId, user, onRestrictedAction }: { movieId: string,
             <Star
               className={`w-8 h-8 transition-colors duration-200 ${
                 star <= (hoverRating || rating) 
-                  ? 'fill-yellow-400 text-yellow-400' 
-                  : 'text-white/20'
+                  ? 'fill-tertiary text-tertiary' 
+                  : 'text-muted-foreground'
               }`}
+              strokeWidth={2.5}
             />
           </motion.button>
         ))}
       </div>
-      <p className="text-sm text-white/60 font-medium">
+      <p className="text-sm text-muted-foreground font-bold">
         ⭐ {averageRating.toFixed(1)} • {totalRatings > 0 ? `${totalRatings} ratings` : 'No ratings yet'}
       </p>
     </div>

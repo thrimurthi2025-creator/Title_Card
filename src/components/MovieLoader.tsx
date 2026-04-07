@@ -8,7 +8,7 @@ export function MovieLoader({ className }: { className?: string }) {
       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       className={className || "p-4"}
     >
-      <Clapperboard className="w-full h-full text-pink-500" />
+      <Clapperboard className="w-full h-full text-accent" strokeWidth={2.5} />
     </motion.div>
   );
 }

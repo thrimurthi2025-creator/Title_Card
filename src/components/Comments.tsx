@@ -64,25 +64,25 @@ export function Comments({ movieId, user, onRestrictedAction, onCountChange }: {
       <div className="relative">
         <div className="flex gap-3 items-center">
           {user?.photoURL && (
-            <img src={user.photoURL} alt={user.displayName || 'User'} className="w-10 h-10 rounded-full border border-white/10" />
+            <img src={user.photoURL} alt={user.displayName || 'User'} className="w-10 h-10 rounded-full border-2 border-foreground shadow-pop" />
           )}
           <div className="flex-1 relative">
             <input
               value={newComment}
               onChange={(e) => setNewComment(e.target.value.slice(0, MAX_CHARS))}
               placeholder="Share your thoughts..."
-              className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-5 text-sm text-white outline-none focus:border-[#00E5FF] focus:ring-1 focus:ring-[#00E5FF]/50 transition-all"
+              className="w-full bg-white border-2 border-foreground rounded-full py-3 px-5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-accent focus:shadow-pop transition-all font-medium"
             />
             <button 
               onClick={handlePostComment} 
               disabled={isPosting || !newComment.trim()}
-              className="absolute right-2 top-2 p-1.5 bg-[#00E5FF] text-black rounded-full hover:bg-white transition-colors disabled:opacity-50"
+              className="absolute right-2 top-1.5 p-2 bg-accent text-white border-2 border-foreground rounded-full shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all disabled:opacity-50"
             >
-              {isPosting ? <MovieLoader className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+              {isPosting ? <MovieLoader className="w-4 h-4 text-white" /> : <Send className="w-4 h-4" strokeWidth={2.5} />}
             </button>
           </div>
         </div>
-        <div className="text-right text-[10px] text-white/40 mt-1 pr-4">
+        <div className="text-right text-[10px] text-muted-foreground font-bold mt-1 pr-4">
           {newComment.length}/{MAX_CHARS}
         </div>
       </div>
@@ -93,7 +93,7 @@ export function Comments({ movieId, user, onRestrictedAction, onCountChange }: {
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-8 text-white/40"
+              className="text-center py-8 text-muted-foreground font-bold"
             >
               <p className="text-lg">No comments yet 🎬</p>
               <p className="text-sm">Be the first to share your thoughts.</p>
@@ -104,19 +104,19 @@ export function Comments({ movieId, user, onRestrictedAction, onCountChange }: {
                 key={comment.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex gap-3 bg-white/5 p-4 rounded-2xl border border-white/5"
+                className="flex gap-3 bg-white p-4 rounded-xl border-2 border-foreground shadow-pop"
               >
-                <img src={comment.userPhoto} alt={comment.userName} className="w-10 h-10 rounded-full" />
+                <img src={comment.userPhoto} alt={comment.userName} className="w-10 h-10 rounded-full border-2 border-foreground shadow-pop" />
                 <div className="flex-1">
                   <div className="flex justify-between items-center mb-1">
-                    <p className="font-bold text-sm">{comment.userName}</p>
-                    <p className="text-[10px] text-white/40">{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate()) + ' ago' : ''}</p>
+                    <p className="font-heading font-bold text-sm text-foreground">{comment.userName}</p>
+                    <p className="text-[10px] text-muted-foreground font-bold">{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate()) + ' ago' : ''}</p>
                   </div>
-                  <p className="text-sm text-white/80">{comment.text}</p>
+                  <p className="text-sm text-foreground font-medium">{comment.text}</p>
                 </div>
                 {user?.uid === comment.userId && (
-                  <button onClick={() => handleDeleteComment(comment.id)} className="text-red-400 hover:text-red-300 self-start">
-                    <Trash2 className="w-4 h-4" />
+                  <button onClick={() => handleDeleteComment(comment.id)} className="text-white bg-secondary border-2 border-foreground rounded-full p-1.5 shadow-pop hover:shadow-pop-hover active:shadow-pop-active self-start transition-all">
+                    <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                   </button>
                 )}
               </motion.div>

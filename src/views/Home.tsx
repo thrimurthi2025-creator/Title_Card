@@ -30,13 +30,13 @@ function SafeImage({ src, alt, className }: { src?: string, alt: string, classNa
     const isBookMyShow = src?.includes('bookmyshow.com');
     
     return (
-      <div className={cn("bg-[#1A1A1A] flex items-center justify-center p-6 text-center", className)}>
+      <div className={cn("bg-muted border-2 border-foreground shadow-pop flex items-center justify-center p-6 text-center", className)}>
         <div className="flex flex-col items-center gap-3 max-w-[80%]">
-          <Clapperboard className="w-10 h-10 text-white/10" />
+          <Clapperboard className="w-10 h-10 text-muted-foreground" strokeWidth={2.5} />
           <div className="space-y-1">
-            <span className="block text-white/40 font-bold text-sm uppercase tracking-widest">{alt}</span>
+            <span className="block text-muted-foreground font-bold text-sm uppercase tracking-widest">{alt}</span>
             {error && (
-              <span className="block text-red-400/60 text-[10px] italic leading-tight">
+              <span className="block text-secondary text-[10px] italic leading-tight font-bold">
                 {isShareLink 
                   ? "Google Share links are not direct images. Please use a direct link." 
                   : isBookMyShow
@@ -142,8 +142,8 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-4">
-        <MovieLoader className="w-16 h-16" />
-        <p className="text-white/60 font-bold tracking-widest uppercase text-xs animate-pulse">Loading Featured Movies...</p>
+        <MovieLoader className="w-16 h-16 text-accent" />
+        <p className="text-muted-foreground font-bold tracking-widest uppercase text-xs animate-pulse">Loading Featured Movies...</p>
       </div>
     );
   }
@@ -151,59 +151,37 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
   if (movies.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] p-8 text-center space-y-4">
-        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center border border-white/10">
-          <Ticket className="w-10 h-10 text-white/20" />
+        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center border-2 border-foreground shadow-pop">
+          <Ticket className="w-10 h-10 text-tertiary" strokeWidth={2.5} />
         </div>
-        <h2 className="text-2xl font-bold text-white/80">No Featured Movies</h2>
-        <p className="text-white/40 max-w-xs">The admin hasn't featured any movies on the home screen yet.</p>
+        <h2 className="text-2xl font-heading font-bold text-foreground">No Featured Movies</h2>
+        <p className="text-muted-foreground max-w-xs">The admin hasn't featured any movies on the home screen yet.</p>
       </div>
     );
   }
 
   return (
     <div className="relative min-h-screen">
-      {/* Cinematic Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute inset-0 bg-[#0B0914]" />
-        <div 
-          className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] opacity-50"
-          style={{
-            background: 'radial-gradient(circle at center, rgba(88, 28, 135, 0.15) 0%, transparent 70%)',
-            willChange: 'transform'
-          }}
-        />
-        <div 
-          className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[80%] opacity-30"
-          style={{
-            background: 'radial-gradient(circle at center, rgba(219, 39, 119, 0.1) 0%, transparent 70%)',
-            willChange: 'transform'
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 p-4 space-y-8 sm:p-8 lg:p-12">
+      <div className="relative z-10 p-4 space-y-12 sm:p-8 lg:p-12">
         {/* Compact Hero Section */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="max-w-2xl mx-auto text-center space-y-2 py-4 sm:py-8"
+          transition={{ duration: 0.4, ease: "easeOut", type: "spring", stiffness: 200, damping: 20 }}
+          className="max-w-2xl mx-auto text-center space-y-4 py-4 sm:py-8 relative"
           style={{ willChange: 'transform, opacity' }}
         >
-          <div className="relative">
-            <div 
-              className="absolute inset-0 opacity-20"
-              style={{
-                background: 'radial-gradient(circle at center, white 0%, transparent 70%)',
-                filter: 'blur(40px)'
-              }}
-            />
-            <h1 className="relative text-3xl sm:text-5xl font-black tracking-tighter leading-[1.1] text-white">
-              Never Miss a<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">Title Card</span> Again
-            </h1>
-          </div>
-          <p className="text-white/40 text-sm sm:text-base font-medium tracking-wide">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-tertiary rounded-full -z-10 mix-blend-multiply opacity-50 blur-3xl"></div>
+          <h1 className="relative text-4xl sm:text-6xl font-heading font-extrabold tracking-tighter leading-[1.1] text-foreground">
+            Never Miss a<br />
+            <span className="text-accent relative inline-block">
+              Title Card
+              <svg className="absolute -bottom-2 left-0 w-full h-3 text-secondary" viewBox="0 0 100 20" preserveAspectRatio="none">
+                <path d="M0,10 Q25,20 50,10 T100,10" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              </svg>
+            </span> Again
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-lg font-medium tracking-wide mt-4">
             Track cinematic moments instantly
           </p>
         </motion.div>
@@ -211,15 +189,15 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
         {/* Hero Section (Featured) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <p className="text-white/40 text-[10px] font-bold tracking-widest uppercase">Featured Premieres</p>
+            <p className="text-foreground text-[10px] font-bold tracking-widest uppercase">Featured Premieres</p>
             <div className="flex gap-1.5">
               {heroMovies.map((_, idx) => (
                 <button 
                   key={idx}
                   onClick={() => setHeroIndex(idx)}
                   className={cn(
-                    "w-1.5 h-1.5 rounded-full transition-all duration-300",
-                    heroIndex === idx ? "bg-white w-4" : "bg-white/20"
+                    "w-2 h-2 rounded-full transition-all duration-300 border border-foreground",
+                    heroIndex === idx ? "bg-accent w-6" : "bg-white"
                   )}
                 />
               ))}
@@ -230,7 +208,7 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="relative aspect-[2/3] sm:aspect-[16/9] rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-[#1A1525]"
+            className="relative aspect-[2/3] sm:aspect-[16/9] blob-radius overflow-hidden shadow-pop bg-white border-2 border-foreground"
             style={{ willChange: 'transform, opacity' }}
           >
             <AnimatePresence>
@@ -251,38 +229,38 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                   alt={heroMovies[heroIndex].title} 
                   className="w-full h-full object-cover" 
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-transparent to-transparent opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent opacity-90" />
                 
                 {/* Title Card Time Badge */}
                 {heroMovies[heroIndex].titleCardTime && (
                   <div className="absolute top-6 left-6 z-20">
-                    <div className="relative flex items-center gap-2 bg-gradient-to-r from-pink-500/20 to-violet-500/20 backdrop-blur-xl border border-white/30 px-5 py-2.5 rounded-full shadow-[0_8px_32px_rgba(236,72,153,0.2)]">
-                      <span className="text-[9px] font-black text-white/70 uppercase tracking-[0.2em]">Title Card</span>
-                      <span className="text-sm font-black text-white tracking-wider">
+                    <div className="relative flex items-center gap-2 bg-white border-2 border-foreground px-5 py-2.5 rounded-full shadow-pop">
+                      <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">Title Card</span>
+                      <span className="text-sm font-black text-accent tracking-wider">
                         {heroMovies[heroIndex].titleCardTime}
                       </span>
                     </div>
                   </div>
                 )}
 
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#0B0914] via-[#0B0914]/70 to-transparent pt-40">
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-white via-white to-transparent pt-40">
                   <div className="flex justify-between items-end mb-4">
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <p className="text-white/40 text-[10px] font-black tracking-[0.3em] uppercase">{heroMovies[heroIndex].genre}</p>
-                        <span className="w-1 h-1 rounded-full bg-white/10" />
-                        <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">{heroMovies[heroIndex].duration}</p>
+                        <p className="text-accent text-[10px] font-black tracking-[0.3em] uppercase">{heroMovies[heroIndex].genre}</p>
+                        <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
+                        <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">{heroMovies[heroIndex].duration}</p>
                       </div>
-                      <h3 className="text-3xl font-black leading-tight mb-3 tracking-tight drop-shadow-lg">{heroMovies[heroIndex].title}</h3>
+                      <h3 className="text-3xl font-heading font-extrabold leading-tight mb-3 tracking-tight text-foreground">{heroMovies[heroIndex].title}</h3>
                       {heroMovies[heroIndex].description && (
-                        <p className="text-white/70 text-sm leading-relaxed mb-6 font-medium max-h-24 overflow-y-auto pr-2 custom-scrollbar drop-shadow-md">
+                        <p className="text-muted-foreground text-sm leading-relaxed mb-6 font-medium max-h-24 overflow-y-auto pr-2 custom-scrollbar">
                           {heroMovies[heroIndex].description}
                         </p>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-3 pb-1">
-                      <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-md text-white px-4 py-2 rounded-2xl text-sm font-black border border-white/10">
-                        <Star className="w-4 h-4 fill-white text-white" />
+                      <div className="flex items-center gap-1.5 bg-tertiary text-foreground px-4 py-2 rounded-full text-sm font-black border-2 border-foreground shadow-pop">
+                        <Star className="w-4 h-4 fill-foreground text-foreground" strokeWidth={2.5} />
                         {heroMovies[heroIndex].rating}
                       </div>
                       {isAdmin && (
@@ -293,23 +271,25 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                             e.stopPropagation();
                             handleDelete(heroMovies[heroIndex].id);
                           }}
-                          className="p-3 bg-red-500/10 text-red-400 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all"
+                          className="p-3 bg-white text-secondary rounded-full border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all"
                         >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 className="w-5 h-5" strokeWidth={2.5} />
                         </motion.button>
                       )}
                     </div>
                   </div>
                   <div className="flex gap-4">
                     <motion.a 
-                      whileHover={{ scale: 1.02, y: -4 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={{ scale: 1.02, x: -2, y: -2 }}
+                      whileTap={{ scale: 0.98, x: 2, y: 2 }}
                       href={`https://in.bookmyshow.com/explore/movies`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 bg-white text-[#0B0914] py-5 rounded-[2rem] font-black text-base flex items-center justify-center gap-3 shadow-xl hover:bg-gray-100 transition-all group/btn"
+                      className="flex-1 bg-accent text-white py-5 rounded-full font-black text-base flex items-center justify-center gap-3 border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all group/btn"
                     >
-                      <Ticket className="w-6 h-6 transition-transform group-hover/btn:rotate-12" />
+                      <div className="bg-white rounded-full p-1 border-2 border-foreground">
+                        <Ticket className="w-5 h-5 text-accent transition-transform group-hover/btn:rotate-12" strokeWidth={2.5} />
+                      </div>
                       GET TICKETS NOW
                     </motion.a>
                   </div>
@@ -327,10 +307,10 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <div className="flex justify-between items-end mb-4">
-            <h3 className="text-xl font-bold">Now in Theaters</h3>
+            <h3 className="text-xl font-heading font-bold text-foreground">Now in Theaters</h3>
             <button 
               onClick={() => navigate('/feed')}
-              className="text-white/40 text-xs font-bold tracking-widest uppercase hover:text-white transition-colors"
+              className="text-muted-foreground text-xs font-bold tracking-widest uppercase hover:text-foreground transition-colors"
             >
               See All
             </button>
@@ -343,15 +323,15 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 + Math.min(idx, 5) * 0.1 }}
-                whileHover={{ y: -8 }}
+                whileHover={{ y: -4 }}
               >
-                <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-4 shadow-2xl border border-white/5">
+                <div className="relative aspect-video rounded-xl overflow-hidden mb-4 shadow-pop-soft border-2 border-foreground bg-white">
                   <SafeImage 
                     src={movie.image} 
                     alt={movie.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
                   
                   {/* Title Card Time Badge */}
                   {movie.titleCardTime && (
@@ -367,10 +347,9 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                       className="absolute top-4 left-4 z-20"
                     >
                       <div className="relative group/time">
-                        <div className="absolute inset-0 bg-pink-500/20 blur-lg rounded-full animate-pulse"></div>
-                        <div className="relative flex items-center gap-1.5 bg-gradient-to-r from-pink-500/10 to-violet-500/10 backdrop-blur-xl border border-white/20 px-3.5 py-2 rounded-full shadow-[0_4px_16px_rgba(236,72,153,0.15)]">
-                          <span className="text-[7px] font-black text-white/60 uppercase tracking-widest">Title Card</span>
-                          <span className="text-[11px] font-black text-white tracking-wider">
+                        <div className="relative flex items-center gap-1.5 bg-white border-2 border-foreground px-3.5 py-2 rounded-full shadow-pop">
+                          <span className="text-[7px] font-black text-muted-foreground uppercase tracking-widest">Title Card</span>
+                          <span className="text-[11px] font-black text-secondary tracking-wider">
                             {movie.titleCardTime}
                           </span>
                         </div>
@@ -380,14 +359,13 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
 
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="bg-white text-[#0B0914] px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                      <div className="bg-tertiary text-foreground border-2 border-foreground px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-pop">
                         {movie.rating}
                       </div>
-                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">{movie.genre}</p>
-                      <span className="w-1 h-1 rounded-full bg-white/10" />
-                      <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">{movie.duration}</p>
+                      <p className="text-foreground text-[10px] font-bold uppercase tracking-widest bg-white px-2 py-0.5 rounded-full border-2 border-foreground">{movie.genre}</p>
+                      <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest bg-white px-2 py-0.5 rounded-full border-2 border-foreground">{movie.duration}</p>
                     </div>
-                    <h4 className="font-black text-lg text-white leading-tight line-clamp-1">{movie.title}</h4>
+                    <h4 className="font-heading font-extrabold text-lg text-foreground leading-tight line-clamp-1 mt-2 bg-white inline-block px-2 py-1 border-2 border-foreground rounded-lg shadow-pop">{movie.title}</h4>
                   </div>
 
                   {isAdmin && (
@@ -398,14 +376,14 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                         e.stopPropagation();
                         handleDelete(movie.id);
                       }}
-                      className="absolute top-4 right-4 p-2.5 bg-red-500 text-white rounded-2xl opacity-0 group-hover:opacity-100 transition-all shadow-xl"
+                      className="absolute top-4 right-4 p-2.5 bg-white text-secondary rounded-full border-2 border-foreground opacity-0 group-hover:opacity-100 transition-all shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                     </motion.button>
                   )}
                 </div>
                 {movie.description && (
-                  <p className="text-white/40 text-[11px] leading-relaxed line-clamp-2 px-1 group-hover:text-white/60 transition-colors">
+                  <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-2 px-1 group-hover:text-foreground transition-colors font-medium">
                     {movie.description}
                   </p>
                 )}
@@ -422,21 +400,21 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
         transition={{ duration: 0.5, delay: 0.5 }}
       >
         <motion.a 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.02, x: -2, y: -2 }}
+          whileTap={{ scale: 0.98, x: 2, y: 2 }}
           href="https://in.bookmyshow.com/" 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="block w-full bg-gradient-to-r from-[#F84464]/20 to-[#F84464]/5 border border-[#F84464]/20 rounded-[2rem] p-6 hover:from-[#F84464]/30 transition-all group relative overflow-hidden"
+          className="block w-full bg-white border-2 border-foreground rounded-xl p-6 shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all group relative overflow-hidden"
         >
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#F84464]/20 to-transparent"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-secondary opacity-10"></div>
           <div className="flex items-center justify-between relative z-10">
             <div>
-              <h3 className="text-2xl font-bold text-[#F84464] mb-1">BookMyShow</h3>
-              <p className="text-white/60 text-sm">Book tickets for your favorite movies instantly</p>
+              <h3 className="text-2xl font-heading font-extrabold text-secondary mb-1">BookMyShow</h3>
+              <p className="text-muted-foreground text-sm font-medium">Book tickets for your favorite movies instantly</p>
             </div>
-            <div className="w-12 h-12 bg-[#F84464] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(248,68,100,0.4)] shrink-0">
-              <Ticket className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center border-2 border-foreground shadow-pop group-hover:scale-110 transition-transform shrink-0">
+              <Ticket className="w-6 h-6 text-white" strokeWidth={2.5} />
             </div>
           </div>
         </motion.a>

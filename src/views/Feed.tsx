@@ -76,10 +76,10 @@ export function Feed({ user, setActiveMovieId }: { user: User | null, setActiveM
   return (
     <div className="p-4 space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight mb-1">
+        <h2 className="text-4xl font-heading font-extrabold tracking-tight mb-2 text-foreground">
           {searchQuery ? `Search: ${searchParams.get('search')}` : 'Community Feed'}
         </h2>
-        <p className="text-white/50 text-sm">
+        <p className="text-muted-foreground text-base font-medium">
           {searchQuery ? `Found ${filteredMovies.length} results` : 'Discover cinematic title cards curated by Cinephile.'}
         </p>
       </div>
@@ -88,10 +88,10 @@ export function Feed({ user, setActiveMovieId }: { user: User | null, setActiveM
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center py-20 bg-white/5 rounded-[2rem] border border-white/10"
+          className="text-center py-20 bg-white rounded-xl border-2 border-foreground shadow-pop"
         >
-          <SearchX className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/50">
+          <SearchX className="w-12 h-12 text-muted-foreground mx-auto mb-4" strokeWidth={2.5} />
+          <p className="text-muted-foreground font-medium">
             {searchQuery ? 'No title cards found for your search.' : 'No title cards shared yet.'}
           </p>
         </motion.div>
@@ -115,74 +115,74 @@ export function Feed({ user, setActiveMovieId }: { user: User | null, setActiveM
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 }
               }}
-              className="bg-[#1A1525] rounded-[2rem] p-5 border border-white/5 shadow-xl hover:border-white/10 transition-colors"
+              className="bg-white rounded-xl p-5 border-2 border-foreground shadow-pop hover:shadow-pop-hover transition-all group"
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white font-bold text-sm overflow-hidden shadow-lg border border-white/10">
+                  <div className="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center text-foreground font-bold text-sm overflow-hidden shadow-pop border-2 border-foreground">
                     {movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? (
-                      <Clapperboard className="w-5 h-5 text-white/90" />
+                      <Clapperboard className="w-5 h-5 text-foreground" strokeWidth={2.5} />
                     ) : (
                       movie.authorName.charAt(0).toUpperCase()
                     )}
                   </div>
                   <div>
-                    <p className="font-bold text-sm">@{movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? 'cinephile' : movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
-                    <p className="text-[10px] text-white/40 uppercase tracking-wider">
+                    <p className="font-bold text-sm text-foreground">@{movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? 'cinephile' : movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                       {formatDistanceToNow(new Date(movie.createdAt)).toUpperCase()} AGO
                     </p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setActiveMovieId(movie.id)}
-                  className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"
+                  className="p-2 bg-white rounded-full border-2 border-transparent hover:border-foreground hover:shadow-pop active:shadow-pop-active transition-all"
                 >
-                  <MessageSquare className="w-5 h-5 text-white/60" />
+                  <MessageSquare className="w-5 h-5 text-foreground" strokeWidth={2.5} />
                 </button>
               </div>
 
               {/* Image */}
-              <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-black mb-5 group cursor-pointer" onClick={() => navigate(`/movie/${movie.id}`)}>
+              <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden bg-muted mb-5 cursor-pointer border-2 border-foreground" onClick={() => navigate(`/movie/${movie.id}`)}>
                 {movie.image ? (
                   <>
-                    <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <img src={movie.image} alt={movie.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" referrerPolicy="no-referrer" />
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         downloadImage(movie.image!, `${movie.title}.jpg`);
                       }}
-                      className="absolute top-2 right-2 p-2 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                      className="absolute top-2 right-2 p-2 bg-white border-2 border-foreground rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
                     >
-                      <Download className="w-5 h-5 text-white" />
+                      <Download className="w-5 h-5 text-foreground" strokeWidth={2.5} />
                     </button>
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white/20">No Image</div>
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground font-bold">No Image</div>
                 )}
               </div>
 
               {/* Details */}
               <div onClick={() => navigate(`/movie/${movie.id}`)} className="cursor-pointer">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-xl font-bold uppercase tracking-wide">{movie.title}</h3>
+                  <h3 className="text-xl font-heading font-extrabold uppercase tracking-wide text-foreground">{movie.title}</h3>
                   {movie.releaseYear && (
-                    <span className="px-3 py-1 bg-white/5 text-white/60 text-xs font-mono rounded-full border border-white/5">
+                    <span className="px-3 py-1 bg-white text-foreground text-xs font-bold rounded-full border-2 border-foreground shadow-pop">
                       {movie.releaseYear}
                     </span>
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/60 leading-relaxed">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground leading-relaxed">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Title card at</span>
-                    <span className="bg-gradient-to-r from-pink-500 to-violet-500 text-white px-3 py-1 rounded-full font-black text-base shadow-[0_0_15px_rgba(236,72,153,0.3)] border border-white/20">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Title card at</span>
+                    <span className="bg-accent text-white px-3 py-1 rounded-full font-black text-base shadow-pop border-2 border-foreground">
                       {movie.titleCardTime}
                     </span>
                   </div>
                   {movie.totalDuration && (
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Duration</span>
-                      <span className="text-white font-mono font-bold">{movie.totalDuration}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Duration</span>
+                      <span className="text-foreground font-bold bg-white px-2 py-0.5 rounded-full border-2 border-foreground">{movie.totalDuration}</span>
                     </div>
                   )}
                 </div>

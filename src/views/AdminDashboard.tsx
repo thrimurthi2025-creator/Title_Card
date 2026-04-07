@@ -313,15 +313,15 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
     <div className="p-4 sm:p-6">
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-blue-200 mb-2">Admin Dashboard</h2>
-          <p className="text-[#8A94A6] text-lg leading-tight">Manage cinematic moments.</p>
+          <h2 className="text-4xl sm:text-5xl font-heading font-extrabold tracking-tight text-foreground mb-2">Admin Dashboard</h2>
+          <p className="text-muted-foreground text-lg font-medium">Manage cinematic moments.</p>
         </div>
         <button 
           onClick={() => logOut()}
-          className="p-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-full transition-colors self-end sm:self-auto"
+          className="p-3 bg-secondary text-white border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active rounded-full transition-all self-end sm:self-auto"
           title="Logout"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-5 h-5" strokeWidth={2.5} />
         </button>
       </div>
 
@@ -331,17 +331,17 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm flex items-center justify-between"
+            className="mb-6 p-4 bg-secondary/20 border-2 border-secondary rounded-xl text-secondary font-bold text-sm flex items-center justify-between shadow-pop"
           >
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="p-1 hover:bg-white/5 rounded-full">
-              <X className="w-4 h-4" />
+            <button onClick={() => setError(null)} className="p-1 hover:bg-white/50 rounded-full">
+              <X className="w-4 h-4" strokeWidth={2.5} />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="flex gap-2 mb-8 bg-[#1A1525] p-1.5 rounded-full border border-white/5 relative">
+      <div className="flex gap-2 mb-8 bg-white p-2 rounded-full border-2 border-foreground shadow-pop relative">
         <button
           onClick={() => {
             setActiveTab('upload');
@@ -349,22 +349,22 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
               setTitle(''); setYear(''); setTime(''); setDuration(''); setImage(null);
             }
           }}
-          className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${activeTab === 'upload' ? 'text-[#0B0914]' : 'text-white/50 hover:text-white'}`}
+          className={`flex-1 py-3 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${activeTab === 'upload' ? 'text-white' : 'text-muted-foreground hover:text-foreground'}`}
         >
           {activeTab === 'upload' && (
-            <motion.div layoutId="activeTab" className="absolute inset-0 bg-white rounded-full -z-10" />
+            <motion.div layoutId="activeTab" className="absolute inset-0 bg-accent border-2 border-foreground shadow-pop rounded-full -z-10" />
           )}
-          <Clapperboard className="w-4 h-4" />
+          <Clapperboard className="w-4 h-4" strokeWidth={2.5} />
           {editingId ? 'Edit Moment' : 'Upload New'}
         </button>
         <button
           onClick={() => setActiveTab('manage')}
-          className={`flex-1 py-2.5 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${activeTab === 'manage' ? 'text-[#0B0914]' : 'text-white/50 hover:text-white'}`}
+          className={`flex-1 py-3 rounded-full text-sm font-bold transition-all flex items-center justify-center gap-2 relative z-10 ${activeTab === 'manage' ? 'text-white' : 'text-muted-foreground hover:text-foreground'}`}
         >
           {activeTab === 'manage' && (
-            <motion.div layoutId="activeTab" className="absolute inset-0 bg-white rounded-full -z-10" />
+            <motion.div layoutId="activeTab" className="absolute inset-0 bg-accent border-2 border-foreground shadow-pop rounded-full -z-10" />
           )}
-          <Layers className="w-4 h-4" />
+          <Layers className="w-4 h-4" strokeWidth={2.5} />
           Manage Feed
         </button>
       </div>
@@ -385,17 +385,17 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div 
               onClick={() => fileInputRef.current?.click()}
-              className="w-full aspect-[4/3] bg-gradient-to-br from-[#2A2438] to-[#1A1525] rounded-[2.5rem] sm:rounded-[3rem] flex flex-col items-center justify-center cursor-pointer hover:opacity-90 transition-opacity overflow-hidden relative shadow-2xl"
+              className="w-full aspect-[4/3] bg-white border-2 border-foreground rounded-[2.5rem] sm:rounded-[3rem] flex flex-col items-center justify-center cursor-pointer hover:shadow-pop-hover transition-all overflow-hidden relative shadow-pop"
             >
               {image ? (
-                <img src={image} alt="Preview" className="w-full h-full object-cover opacity-80" />
+                <img src={image} alt="Preview" className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-[#3A4B5C] rounded-full flex items-center justify-center mb-4 shadow-lg">
-                    <Clapperboard className="w-8 h-8 text-white/40" />
+                  <div className="w-16 h-16 bg-tertiary border-2 border-foreground rounded-full flex items-center justify-center mb-4 shadow-pop">
+                    <Clapperboard className="w-8 h-8 text-foreground" strokeWidth={2.5} />
                   </div>
-                  <span className="text-white font-bold text-lg mb-1">Drop frame or browse</span>
-                  <span className="text-[#8A94A6] text-sm">Supports HEIF, PNG up to 50MB</span>
+                  <span className="text-foreground font-heading font-bold text-xl mb-1">Drop frame or browse</span>
+                  <span className="text-muted-foreground text-sm font-medium">Supports HEIF, PNG up to 50MB</span>
                 </div>
               )}
               <input
@@ -408,27 +408,27 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10">
+              <div className="flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-foreground shadow-pop">
                 <input 
                   type="checkbox" 
                   id="isFeatured"
                   checked={isFeatured}
                   onChange={(e) => setIsFeatured(e.target.checked)}
-                  className="w-5 h-5 rounded border-white/20 bg-white/10 text-white focus:ring-white/20"
+                  className="w-5 h-5 rounded border-2 border-foreground text-accent focus:ring-accent"
                 />
-                <label htmlFor="isFeatured" className="text-sm font-bold text-white/80 cursor-pointer">
+                <label htmlFor="isFeatured" className="text-sm font-bold text-foreground cursor-pointer">
                   Feature on Home Screen
                 </label>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Movie Title</label>
+                <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Movie Title</label>
                 <div className="relative">
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 pr-14 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                    className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 pr-14 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
                     placeholder="e.g. Blade Runner 2049"
                     required
                   />
@@ -436,32 +436,32 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                     type="button"
                     onClick={fetchMovieInfo}
                     disabled={fetchingInfo || !title}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all disabled:opacity-50"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-tertiary border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active rounded-full transition-all disabled:opacity-50"
                     title="Auto-fill details using AI"
                   >
-                    {fetchingInfo ? <MovieLoader className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+                    {fetchingInfo ? <MovieLoader className="w-5 h-5 text-foreground" /> : <Search className="w-5 h-5 text-foreground" strokeWidth={2.5} />}
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Release Year</label>
+                  <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Release Year</label>
                   <input
                     type="text"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
-                    className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                    className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
                     placeholder="2017"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Title card</label>
+                  <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Title card</label>
                   <input
                     type="text"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                    className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
                     placeholder="01:42:05"
                     required
                   />
@@ -469,12 +469,12 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Total Duration</label>
+                <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Total Duration</label>
                 <input
                   type="text"
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
-                  className="w-full bg-[#7A7488]/40 border-none rounded-full py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all text-lg"
+                  className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
                   placeholder="e.g. 2h 43m"
                 />
               </div>
@@ -573,10 +573,10 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full py-5 bg-white hover:bg-gray-100 text-[#0B0914] rounded-full font-bold text-xl shadow-2xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+              className="w-full py-5 bg-accent text-white border-2 border-foreground rounded-full font-heading font-extrabold text-2xl shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all disabled:opacity-50 flex items-center justify-center gap-3"
             >
               {loading ? (editingId ? 'Updating...' : 'Publishing...') : (editingId ? 'Update Moment' : 'Publish Moment')}
-              {!loading && <Rocket className="w-6 h-6" />}
+              {!loading && <Rocket className="w-6 h-6" strokeWidth={2.5} />}
             </motion.button>
           </div>
           
@@ -588,7 +588,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                 setTitle(''); setYear(''); setTime(''); setDuration(''); setImage(null);
                 setActiveTab('manage');
               }}
-              className="w-full py-3 text-white/50 hover:text-white transition-colors"
+              className="w-full py-3 text-muted-foreground hover:text-foreground font-bold transition-colors"
             >
               Cancel Editing
             </button>
@@ -604,8 +604,8 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
           className="space-y-4"
         >
           {movies.length === 0 ? (
-            <div className="text-center py-12 bg-white/5 rounded-[2rem] border border-white/10">
-              <p className="text-white/50">No title cards published yet.</p>
+            <div className="text-center py-12 bg-white rounded-xl border-2 border-foreground shadow-pop">
+              <p className="text-muted-foreground font-bold">No title cards published yet.</p>
             </div>
           ) : (
             <motion.div
@@ -627,26 +627,26 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                     hidden: { opacity: 0, x: -20 },
                     visible: { opacity: 1, x: 0 }
                   }}
-                  className="bg-[#1A1525] p-4 rounded-3xl border border-white/5 flex gap-4 items-center shadow-lg hover:border-white/10 transition-colors"
+                  className="bg-white p-4 rounded-xl border-2 border-foreground flex gap-4 items-center shadow-pop hover:shadow-pop-hover transition-all"
                 >
-                <div className="w-20 h-20 bg-black rounded-2xl overflow-hidden shrink-0">
+                <div className="w-20 h-20 bg-muted border-2 border-foreground rounded-lg overflow-hidden shrink-0">
                   {movie.image ? (
                     <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">No Img</div>
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground font-bold text-xs">No Img</div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-bold text-lg truncate">{movie.title}</h4>
+                    <h4 className="font-heading font-extrabold text-lg truncate text-foreground">{movie.title}</h4>
                     {movie.isFeatured && (
-                      <span className="px-2 py-0.5 bg-white/10 text-white/60 text-[8px] font-bold rounded-full border border-white/10 uppercase tracking-widest">
+                      <span className="px-2 py-0.5 bg-accent text-white text-[8px] font-bold rounded-full border-2 border-foreground uppercase tracking-widest">
                         Featured
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-white/60 font-mono mb-1">{movie.titleCardTime}</p>
-                  <p className="text-[10px] text-white/40 uppercase tracking-wider">
+                  <p className="text-xs text-muted-foreground font-bold mb-1">{movie.titleCardTime}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                     {movie.createdAt ? formatDistanceToNow(new Date(movie.createdAt), { addSuffix: true }) : 'Just now'}
                   </p>
                 </div>
@@ -655,35 +655,35 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                       <div className="flex flex-col gap-2">
                         <button 
                           onClick={() => handleDelete(movie.id)}
-                          className="p-2 bg-red-500 text-white rounded-full shadow-lg shadow-red-500/20"
+                          className="p-2 bg-secondary text-white border-2 border-foreground rounded-full shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
                           title="Confirm Delete"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                         <button 
                           onClick={() => setDeletingId(null)}
-                          className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                          className="p-2 bg-white text-foreground border-2 border-foreground rounded-full shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
                           title="Cancel"
                         >
-                          <X className="w-4 h-4 text-white" />
+                          <X className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                       </div>
                     ) : (
                       <>
                         <button 
                           onClick={() => handleEdit(movie)}
-                          className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                          className="p-2 bg-white text-foreground border-2 border-foreground rounded-full shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
                         >
-                          <Edit2 className="w-4 h-4 text-white" />
+                          <Edit2 className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                         <button 
                           onClick={() => {
                             setError(null);
                             setDeletingId(movie.id);
                           }}
-                          className="p-2 bg-red-500/10 hover:bg-red-500/20 rounded-full transition-colors"
+                          className="p-2 bg-white text-secondary border-2 border-foreground rounded-full shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
                         >
-                          <Trash2 className="w-4 h-4 text-red-400" />
+                          <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                         </button>
                       </>
                     )}
