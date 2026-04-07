@@ -4,7 +4,8 @@ import { doc, getDoc, updateDoc, collection, query, where, getCountFromServer, c
 import { db, storage, logOut } from '../lib/firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Loader2, Camera, Save, Edit2, LogOut } from 'lucide-react';
+import { MovieLoader } from '../components/MovieLoader';
+import { Camera, Save, Edit2, LogOut } from 'lucide-react';
 
 export function Profile({ user }: { user: User }) {
   const [profile, setProfile] = useState<any>(null);
@@ -65,7 +66,7 @@ export function Profile({ user }: { user: User }) {
     setUploading(false);
   };
 
-  if (loading) return <div className="p-12 text-center text-white">Loading...</div>;
+  if (loading) return <div className="p-12 flex justify-center"><MovieLoader className="w-12 h-12" /></div>;
 
   return (
     <div className="p-8 max-w-lg mx-auto space-y-8 bg-[#1A1525] rounded-[2rem] border border-white/5">
@@ -76,7 +77,7 @@ export function Profile({ user }: { user: User }) {
             <Camera className="w-5 h-5 text-[#0B0914]" />
             <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
           </label>
-          {uploading && <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center"><Loader2 className="animate-spin text-white" /></div>}
+          {uploading && <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center"><MovieLoader className="w-8 h-8" /></div>}
         </div>
         <h2 className="text-2xl font-bold text-white">{profile?.name || user.displayName}</h2>
         <p className="text-white/60">{profile?.email || user.email}</p>

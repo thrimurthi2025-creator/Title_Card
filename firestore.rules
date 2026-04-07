@@ -64,6 +64,10 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
+    match /{path=**}/comments/{commentId} {
+      allow read: if true;
+    }
+
     match /ratings/{userId_movieId} {
       allow read: if true;
       allow create: if isAuthenticated() && hasRequiredFields(['userId', 'movieId', 'rating', 'createdAt']) && request.resource.data.userId == request.auth.uid && userId_movieId == request.auth.uid + '_' + request.resource.data.movieId;

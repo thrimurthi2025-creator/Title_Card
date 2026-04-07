@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Play, Star, Ticket, Loader2, Trash2, Clock, Clapperboard, X } from 'lucide-react';
+import { Play, Star, Ticket, Trash2, Clock, Clapperboard, X } from 'lucide-react';
+import { MovieLoader } from '../components/MovieLoader';
 import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { cn } from '../lib/utils';
@@ -141,7 +142,7 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 space-y-4">
-        <Loader2 className="w-10 h-10 text-white animate-spin" />
+        <MovieLoader className="w-16 h-16" />
         <p className="text-white/60 font-bold tracking-widest uppercase text-xs animate-pulse">Loading Featured Movies...</p>
       </div>
     );

@@ -3,7 +3,8 @@ import { collection, addDoc, query, orderBy, onSnapshot, doc, deleteDoc, updateD
 import { db, logOut, auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { Clapperboard, Rocket, LogOut, Trash2, Edit2, Layers, X, ExternalLink, Search, Loader2 } from 'lucide-react';
+import { Clapperboard, Rocket, LogOut, Trash2, Edit2, Layers, X, ExternalLink, Search } from 'lucide-react';
+import { MovieLoader } from '../components/MovieLoader';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -438,7 +439,7 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all disabled:opacity-50"
                     title="Auto-fill details using AI"
                   >
-                    {fetchingInfo ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                    {fetchingInfo ? <MovieLoader className="w-5 h-5" /> : <Search className="w-5 h-5" />}
                   </button>
                 </div>
               </div>

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { User } from 'firebase/auth';
-import { Trash2, Send, Loader2 } from 'lucide-react';
+import { Trash2, Send } from 'lucide-react';
+import { MovieLoader } from './MovieLoader';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -77,7 +78,7 @@ export function Comments({ movieId, user, onRestrictedAction, onCountChange }: {
               disabled={isPosting || !newComment.trim()}
               className="absolute right-2 top-2 p-1.5 bg-[#00E5FF] text-black rounded-full hover:bg-white transition-colors disabled:opacity-50"
             >
-              {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {isPosting ? <MovieLoader className="w-4 h-4" /> : <Send className="w-4 h-4" />}
             </button>
           </div>
         </div>
