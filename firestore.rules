@@ -5,6 +5,13 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == resource.data.uid;
+    }
     function isAdmin() {
       return isAuthenticated() && 
              (request.auth.token.email == 'akdiljith7@gmail.com' ||
@@ -46,9 +53,27 @@ service cloud.firestore {
              validOptionalString('backdropUrl', 1, 1000);
     }
 
-    match /movies/{movieId} {
+    match /movies/{document=**} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
+    }
+
+    match /movies/{movieId}/comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && hasRequiredFields(['text', 'userId', 'userName', 'createdAt']) && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /ratings/{userId_movieId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && hasRequiredFields(['userId', 'movieId', 'rating', 'createdAt']) && request.resource.data.userId == request.auth.uid && userId_movieId == request.auth.uid + '_' + request.resource.data.movieId;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid && request.resource.data.rating == request.resource.data.rating;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && hasRequiredFields(['uid', 'name', 'email', 'createdAt']);
+      allow update: if isOwner(userId) && uidNotModified();
     }
   }
 }

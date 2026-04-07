@@ -1,14 +1,20 @@
 import { useEffect, useState, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth, signInWithGoogle, logOut } from './lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, signInWithGoogle, logOut, db } from './lib/firebase';
+import { handleFirestoreError, OperationType } from './lib/firestoreUtils';
 import { Home } from './views/Home';
 import { Feed } from './views/Feed';
 import { AdminDashboard } from './views/AdminDashboard';
 import { Theaters } from './views/Theaters';
-import { Home as HomeIcon, Layers, Shield, Map, Search, X } from 'lucide-react';
+import { Profile } from './views/Profile';
+import { MovieDetails } from './views/MovieDetails';
+import { Home as HomeIcon, Layers, Shield, Map, Search, X, LogOut, User as UserIcon } from 'lucide-react';
 import { cn } from './lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
+import { LoginModal } from './components/LoginModal';
+import { CommentBottomSheet } from './components/CommentBottomSheet';
 
 function Navigation({ isAdmin }: { isAdmin: boolean }) {
   const location = useLocation();
@@ -48,9 +54,10 @@ function Navigation({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
-function Header({ user, showAdminLogin, handleTitleClick }: { user: User | null, showAdminLogin: boolean, handleTitleClick: () => void }) {
+function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user: User | null, showAdminLogin: boolean, handleTitleClick: () => void, onLoginClick: () => void }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -66,11 +73,6 @@ function Header({ user, showAdminLogin, handleTitleClick }: { user: User | null,
     <header className="sticky top-0 z-40 bg-white/[0.03] backdrop-blur-[32px] border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/5 before:to-transparent before:pointer-events-none">
       <div className="max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-6 py-4 flex justify-between items-center relative z-10">
         <div className="flex items-center gap-3">
-        {user?.photoURL && !isSearchOpen && (
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 shrink-0">
-            <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
-          </div>
-        )}
         {!isSearchOpen && (
           <motion.h1 
             whileTap={{ scale: 0.95 }}
@@ -108,6 +110,30 @@ function Header({ user, showAdminLogin, handleTitleClick }: { user: User | null,
             >
               <Search className="w-6 h-6" />
             </button>
+            {user ? (
+              <div className="relative">
+                <button onClick={() => setShowMenu(!showMenu)} className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+                  <img src={user.photoURL || ''} alt="User" className="w-full h-full object-cover" />
+                </button>
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-[#1A1525] border border-white/10 rounded-2xl p-2 shadow-xl">
+                    <Link to="/profile" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-white/80 hover:bg-white/5 rounded-xl">
+                      <UserIcon className="w-4 h-4" /> Profile
+                    </Link>
+                    <button onClick={() => { logOut(); setShowMenu(false); }} className="flex items-center gap-2 p-2 text-red-400 hover:bg-white/5 rounded-xl w-full">
+                      <LogOut className="w-4 h-4" /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button 
+                onClick={onLoginClick}
+                className="text-xs font-bold text-white hover:text-white/80 transition-colors uppercase tracking-widest px-4 py-2 bg-white/10 rounded-full"
+              >
+                Login
+              </button>
+            )}
             <AnimatePresence>
               {(!user && showAdminLogin) && (
                 <motion.button 
@@ -143,16 +169,18 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AnimatedRoutes({ user, isAdmin }: { user: User | null, isAdmin: boolean }) {
+function AnimatedRoutes({ user, isAdmin, setActiveMovieId }: { user: User | null, isAdmin: boolean, setActiveMovieId: (id: string | null) => void }) {
   const location = useLocation();
   
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageWrapper><Home isAdmin={isAdmin} /></PageWrapper>} />
-        <Route path="/feed" element={<PageWrapper><Feed /></PageWrapper>} />
+        <Route path="/" element={<PageWrapper><Home user={user} isAdmin={isAdmin} /></PageWrapper>} />
+        <Route path="/feed" element={<PageWrapper><Feed user={user} setActiveMovieId={setActiveMovieId} /></PageWrapper>} />
+        <Route path="/movie/:id" element={<PageWrapper><MovieDetails user={user} /></PageWrapper>} />
         <Route path="/admin" element={<PageWrapper><AdminDashboard user={user} isAdmin={isAdmin} /></PageWrapper>} />
         <Route path="/nearby" element={<PageWrapper><Theaters /></PageWrapper>} />
+        {user && <Route path="/profile" element={<PageWrapper><Profile user={user} /></PageWrapper>} />}
       </Routes>
     </AnimatePresence>
   );
@@ -161,6 +189,8 @@ function AnimatedRoutes({ user, isAdmin }: { user: User | null, isAdmin: boolean
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [activeMovieId, setActiveMovieId] = useState<string | null>(null);
   
   // Secret login state
   const [loginClicks, setLoginClicks] = useState(0);
@@ -169,11 +199,26 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser && currentUser.email !== 'akdiljith7@gmail.com') {
-        await logOut();
-        setUser(null);
-      } else {
+      if (currentUser) {
+        // Store user in Firestore on first login
+        const userRef = doc(db, 'users', currentUser.uid);
+        try {
+          const userSnap = await getDoc(userRef);
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              uid: currentUser.uid,
+              name: currentUser.displayName,
+              email: currentUser.email,
+              photoURL: currentUser.photoURL,
+              createdAt: new Date().toISOString()
+            });
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.WRITE, 'users/' + currentUser.uid);
+        }
         setUser(currentUser);
+      } else {
+        setUser(null);
       }
       setLoading(false);
     });
@@ -213,13 +258,21 @@ export default function App() {
         <div className="fixed inset-0 bg-[#0B0914] -z-10"></div>
         
         <div className="relative z-10 flex flex-col min-h-screen">
-          <Header user={user} showAdminLogin={showAdminLogin} handleTitleClick={handleTitleClick} />
+          <Header user={user} showAdminLogin={showAdminLogin} handleTitleClick={handleTitleClick} onLoginClick={() => setIsLoginModalOpen(true)} />
 
           <main className="flex-1 w-full max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-6 lg:px-8">
-            <AnimatedRoutes user={user} isAdmin={isAdmin} />
+            <AnimatedRoutes user={user} isAdmin={isAdmin} setActiveMovieId={setActiveMovieId} />
           </main>
 
           <Navigation isAdmin={isAdmin} />
+          <CommentBottomSheet 
+            isOpen={!!activeMovieId} 
+            onClose={() => setActiveMovieId(null)} 
+            movieId={activeMovieId || ''} 
+            user={user} 
+            onRestrictedAction={() => setIsLoginModalOpen(true)}
+          />
+          <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
         </div>
       </div>
     </BrowserRouter>

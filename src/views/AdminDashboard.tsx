@@ -105,7 +105,8 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
     setFetchingInfo(true);
     setError(null);
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+      // @ts-ignore - process.env might not be defined in all environments
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : undefined);
       if (!apiKey) {
         throw new Error("Gemini API Key is missing. Please set VITE_GEMINI_API_KEY in Vercel.");
       }

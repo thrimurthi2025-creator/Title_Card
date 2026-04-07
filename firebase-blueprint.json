@@ -19,12 +19,63 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["title", "titleCardTime", "authorId", "authorName", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A user profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User UID" },
+        "name": { "type": "string", "description": "User name" },
+        "email": { "type": "string", "description": "User email" },
+        "photoURL": { "type": "string", "description": "User photo URL" },
+        "bio": { "type": "string", "description": "User bio" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email", "createdAt"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A comment on a movie",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "Comment text" },
+        "userId": { "type": "string", "description": "User UID" },
+        "userName": { "type": "string", "description": "User name" },
+        "userPhoto": { "type": "string", "description": "User photo URL" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["text", "userId", "userName", "createdAt"]
+    },
+    "Rating": {
+      "title": "Rating",
+      "description": "A rating for a movie",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "User UID" },
+        "movieId": { "type": "string", "description": "Movie ID" },
+        "rating": { "type": "number", "description": "Rating (1-5)" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "movieId", "rating", "createdAt"]
     }
   },
   "firestore": {
     "/movies/{movieId}": {
       "schema": { "$ref": "#/entities/MovieEntry" },
       "description": "Collection of movie title card entries"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/movies/{movieId}/comments/{commentId}": {
+      "schema": { "$ref": "#/entities/Comment" },
+      "description": "Comments on movies"
+    },
+    "/ratings/{userId_movieId}": {
+      "schema": { "$ref": "#/entities/Rating" },
+      "description": "Movie ratings"
     }
   }
 }

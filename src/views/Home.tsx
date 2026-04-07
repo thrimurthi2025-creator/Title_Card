@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Play, Star, Ticket, Loader2, Trash2, Clock } from 'lucide-react';
+import { Play, Star, Ticket, Loader2, Trash2, Clock, Clapperboard, X } from 'lucide-react';
 import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { User } from 'firebase/auth';
+import { LoginModal } from '../components/LoginModal';
 
 interface Movie {
   id: string;
@@ -22,10 +24,6 @@ interface Movie {
 function SafeImage({ src, alt, className }: { src?: string, alt: string, className?: string }) {
   const [error, setError] = useState(false);
 
-  // If src is empty or has error, we try to show nothing or a placeholder
-  // But the user wants the poster to appear. 
-  // If the URL is invalid, we can't do much except show the alt text.
-  
   if (!src || error) {
     const isShareLink = src?.includes('share.google') || src?.includes('photos.app.goo.gl');
     const isBookMyShow = src?.includes('bookmyshow.com');
@@ -65,12 +63,13 @@ function SafeImage({ src, alt, className }: { src?: string, alt: string, classNa
   );
 }
 
-import { Clapperboard } from 'lucide-react';
-
-export function Home({ isAdmin }: { isAdmin?: boolean }) {
+export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }) {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const onRestrictedAction = () => setIsLoginModalOpen(true);
 
   const heroMovies = movies.slice(0, 5);
   const spotlightMovies = movies.slice(0, 3);

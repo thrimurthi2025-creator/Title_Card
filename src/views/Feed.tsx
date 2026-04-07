@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { SearchX, Clapperboard, Download } from 'lucide-react';
+import { SearchX, Clapperboard, MessageSquare, Download } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { User } from 'firebase/auth';
+import { CommentBottomSheet } from '../components/CommentBottomSheet';
+import { LoginModal } from '../components/LoginModal';
 
 interface MovieEntry {
   id: string;
@@ -18,11 +21,29 @@ interface MovieEntry {
   releaseYear?: string;
 }
 
-export function Feed() {
+export function Feed({ user, setActiveMovieId }: { user: User | null, setActiveMovieId: (id: string | null) => void }) {
   const [movies, setMovies] = useState<MovieEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+  const navigate = useNavigate();
+
+  const downloadImage = async (url: string, filename: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading image:", error);
+    }
+  };
 
   useEffect(() => {
     const q = query(collection(db, 'movies'), orderBy('createdAt', 'desc'));
@@ -40,25 +61,6 @@ export function Feed() {
 
     return () => unsubscribe();
   }, []);
-
-  const handleDownload = async (imageUrl: string, title: string) => {
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${title.replace(/\s+/g, '_')}_title_card.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error downloading image:", error);
-      // Fallback: open in new tab if fetch fails (CORS)
-      window.open(imageUrl, '_blank');
-    }
-  };
 
   if (loading) {
     return (
@@ -135,31 +137,36 @@ export function Feed() {
                     </p>
                   </div>
                 </div>
-                {movie.image && (
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => handleDownload(movie.image!, movie.title)}
-                    className="p-2.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-2xl border border-white/10 transition-all flex items-center gap-2 group"
-                    title="Download Title Card"
-                  >
-                    <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                    <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Save</span>
-                  </motion.button>
-                )}
+                <button 
+                  onClick={() => setActiveMovieId(movie.id)}
+                  className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors"
+                >
+                  <MessageSquare className="w-5 h-5 text-white/60" />
+                </button>
               </div>
 
               {/* Image */}
-              <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-black mb-5 group">
+              <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-black mb-5 group cursor-pointer" onClick={() => navigate(`/movie/${movie.id}`)}>
                 {movie.image ? (
-                  <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <>
+                    <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadImage(movie.image!, `${movie.title}.jpg`);
+                      }}
+                      className="absolute top-2 right-2 p-2 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                    >
+                      <Download className="w-5 h-5 text-white" />
+                    </button>
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-white/20">No Image</div>
                 )}
               </div>
 
               {/* Details */}
-              <div>
+              <div onClick={() => navigate(`/movie/${movie.id}`)} className="cursor-pointer">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="text-xl font-bold uppercase tracking-wide">{movie.title}</h3>
                   {movie.releaseYear && (
