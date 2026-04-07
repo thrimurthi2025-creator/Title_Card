@@ -3,10 +3,13 @@ import { doc, getDoc, setDoc, collection, query, where, onSnapshot } from 'fireb
 import { db } from '../lib/firebase';
 import { User } from 'firebase/auth';
 import { Star } from 'lucide-react';
+import { motion } from 'motion/react';
 
 export function Rating({ movieId, user, onRestrictedAction }: { movieId: string, user: User | null, onRestrictedAction: () => void }) {
   const [rating, setRating] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
     if (user) {
@@ -23,6 +26,7 @@ export function Rating({ movieId, user, onRestrictedAction }: { movieId: string,
       let total = 0;
       snapshot.forEach((doc) => total += doc.data().rating);
       setAverageRating(snapshot.size > 0 ? total / snapshot.size : 0);
+      setTotalRatings(snapshot.size);
     });
     return () => unsubscribe();
   }, [movieId, user]);
@@ -42,17 +46,31 @@ export function Rating({ movieId, user, onRestrictedAction }: { movieId: string,
   };
 
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex gap-1">
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
         {[1, 2, 3, 4, 5].map((star) => (
-          <Star
+          <motion.button
             key={star}
-            className={`w-6 h-6 cursor-pointer ${star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-white/20'}`}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => handleRate(star)}
-          />
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            className="p-1 focus:outline-none"
+          >
+            <Star
+              className={`w-8 h-8 transition-colors duration-200 ${
+                star <= (hoverRating || rating) 
+                  ? 'fill-yellow-400 text-yellow-400' 
+                  : 'text-white/20'
+              }`}
+            />
+          </motion.button>
         ))}
       </div>
-      <p className="font-bold text-lg">{averageRating.toFixed(1)} ⭐</p>
+      <p className="text-sm text-white/60 font-medium">
+        ⭐ {averageRating.toFixed(1)} • {totalRatings > 0 ? `${totalRatings} ratings` : 'No ratings yet'}
+      </p>
     </div>
   );
 }

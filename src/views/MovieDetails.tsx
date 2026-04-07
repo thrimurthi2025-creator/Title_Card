@@ -7,6 +7,7 @@ import { ArrowLeft, Star, Send, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Comments } from '../components/Comments';
 import { Rating } from '../components/Rating';
+import { MovieDetailsSkeleton } from '../components/ui/MovieDetailsSkeleton';
 import { LoginModal } from '../components/LoginModal';
 
 interface Movie {
@@ -38,7 +39,7 @@ export function MovieDetails({ user }: { user: User | null }) {
     fetchMovie();
   }, [id]);
 
-  if (loading) return <div className="flex justify-center py-12 text-white">Loading...</div>;
+  if (loading) return <MovieDetailsSkeleton />;
   if (!movie) return <div className="text-white text-center py-12">Movie not found</div>;
 
   return (

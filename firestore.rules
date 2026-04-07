@@ -1,6 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
+  match /databases/ai-studio-14298393-ee7e-4af3-8d22-2f920195856c/documents {
     // Helper Functions
     function isAuthenticated() {
       return request.auth != null;
@@ -71,7 +71,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if isOwner(userId) && hasRequiredFields(['uid', 'name', 'email', 'createdAt']);
       allow update: if isOwner(userId) && uidNotModified();
     }

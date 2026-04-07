@@ -160,139 +160,163 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
   }
 
   return (
-    <div className="p-4 space-y-12 sm:p-8 lg:p-12">
-      {/* Intro Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-3xl mx-auto text-center space-y-6 py-8 sm:py-12"
-      >
-        <h1 className="text-4xl sm:text-6xl font-black tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/20">
-          Never Miss a <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">Title Card</span> Again.
-        </h1>
-        <p className="text-white/50 text-base sm:text-lg font-medium leading-relaxed max-w-xl mx-auto">
-          Lumiere tracks and notifies you exactly when movie title cards are released. 
-          The ultimate companion for cinephiles and collectors.
-        </p>
-      </motion.div>
+    <div className="relative min-h-screen">
+      {/* Cinematic Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-[#0B0914]" />
+        <div 
+          className="absolute top-[-20%] left-[-10%] w-[80%] h-[80%] opacity-50"
+          style={{
+            background: 'radial-gradient(circle at center, rgba(88, 28, 135, 0.15) 0%, transparent 70%)',
+            willChange: 'transform'
+          }}
+        />
+        <div 
+          className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[80%] opacity-30"
+          style={{
+            background: 'radial-gradient(circle at center, rgba(219, 39, 119, 0.1) 0%, transparent 70%)',
+            willChange: 'transform'
+          }}
+        />
+      </div>
 
-      {/* Hero Section */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between px-1">
-          <p className="text-white/40 text-xs font-bold tracking-widest uppercase">Featured Premieres</p>
-          <div className="flex gap-1.5">
-            {heroMovies.map((_, idx) => (
-              <button 
-                key={idx}
-                onClick={() => setHeroIndex(idx)}
-                className={cn(
-                  "w-1.5 h-1.5 rounded-full transition-all duration-300",
-                  heroIndex === idx ? "bg-white w-4" : "bg-white/20"
-                )}
-              />
-            ))}
+      <div className="relative z-10 p-4 space-y-8 sm:p-8 lg:p-12">
+        {/* Compact Hero Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="max-w-2xl mx-auto text-center space-y-2 py-4 sm:py-8"
+          style={{ willChange: 'transform, opacity' }}
+        >
+          <div className="relative">
+            <div 
+              className="absolute inset-0 opacity-20"
+              style={{
+                background: 'radial-gradient(circle at center, white 0%, transparent 70%)',
+                filter: 'blur(40px)'
+              }}
+            />
+            <h1 className="relative text-3xl sm:text-5xl font-black tracking-tighter leading-[1.1] text-white">
+              Never Miss a<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">Title Card</span> Again
+            </h1>
           </div>
-        </div>
-        
-        <div className="relative aspect-[2/3] sm:aspect-[16/9] rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-[#1A1525]">
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={heroMovies[heroIndex].id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              onDragEnd={handleHeroDragEnd}
-              className="absolute inset-0 cursor-grab active:cursor-grabbing"
-            >
-              <SafeImage 
-                src={heroMovies[heroIndex].posterImage} 
-                alt={heroMovies[heroIndex].title} 
-                className="w-full h-full object-cover" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-transparent to-transparent opacity-80" />
-              
-              {/* Title Card Time Badge */}
-              {heroMovies[heroIndex].titleCardTime && (
-                <motion.div 
-                  initial={{ scale: 0.5, opacity: 0, y: 10 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: 0.5, 
-                    type: "spring", 
-                    stiffness: 260, 
-                    damping: 20 
-                  }}
-                  className="absolute top-6 left-6 z-20"
-                >
-                  <div className="relative group/time">
-                    <div className="absolute inset-0 bg-pink-500/30 blur-xl rounded-full animate-pulse"></div>
+          <p className="text-white/40 text-sm sm:text-base font-medium tracking-wide">
+            Track cinematic moments instantly
+          </p>
+        </motion.div>
+
+        {/* Hero Section (Featured) */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <p className="text-white/40 text-[10px] font-bold tracking-widest uppercase">Featured Premieres</p>
+            <div className="flex gap-1.5">
+              {heroMovies.map((_, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => setHeroIndex(idx)}
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                    heroIndex === idx ? "bg-white w-4" : "bg-white/20"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+          
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="relative aspect-[2/3] sm:aspect-[16/9] rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-[#1A1525]"
+            style={{ willChange: 'transform, opacity' }}
+          >
+            <AnimatePresence>
+              <motion.div 
+                key={heroMovies[heroIndex].id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: "linear" }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={handleHeroDragEnd}
+                className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                style={{ willChange: 'opacity' }}
+              >
+                <SafeImage 
+                  src={heroMovies[heroIndex].posterImage} 
+                  alt={heroMovies[heroIndex].title} 
+                  className="w-full h-full object-cover" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0914] via-transparent to-transparent opacity-80" />
+                
+                {/* Title Card Time Badge */}
+                {heroMovies[heroIndex].titleCardTime && (
+                  <div className="absolute top-6 left-6 z-20">
                     <div className="relative flex items-center gap-2 bg-gradient-to-r from-pink-500/20 to-violet-500/20 backdrop-blur-xl border border-white/30 px-5 py-2.5 rounded-full shadow-[0_8px_32px_rgba(236,72,153,0.2)]">
                       <span className="text-[9px] font-black text-white/70 uppercase tracking-[0.2em]">Title Card</span>
-                      <span className="text-sm font-black text-white tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
+                      <span className="text-sm font-black text-white tracking-wider">
                         {heroMovies[heroIndex].titleCardTime}
                       </span>
                     </div>
                   </div>
-                </motion.div>
-              )}
+                )}
 
-              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#0B0914] via-[#0B0914]/70 to-transparent pt-40">
-                <div className="flex justify-between items-end mb-4">
-                  <div className="flex-1 min-w-0 pr-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <p className="text-white/40 text-[10px] font-black tracking-[0.3em] uppercase">{heroMovies[heroIndex].genre}</p>
-                      <span className="w-1 h-1 rounded-full bg-white/10" />
-                      <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">{heroMovies[heroIndex].duration}</p>
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#0B0914] via-[#0B0914]/70 to-transparent pt-40">
+                  <div className="flex justify-between items-end mb-4">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-white/40 text-[10px] font-black tracking-[0.3em] uppercase">{heroMovies[heroIndex].genre}</p>
+                        <span className="w-1 h-1 rounded-full bg-white/10" />
+                        <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">{heroMovies[heroIndex].duration}</p>
+                      </div>
+                      <h3 className="text-3xl font-black leading-tight mb-3 tracking-tight drop-shadow-lg">{heroMovies[heroIndex].title}</h3>
+                      {heroMovies[heroIndex].description && (
+                        <p className="text-white/70 text-sm leading-relaxed mb-6 font-medium max-h-24 overflow-y-auto pr-2 custom-scrollbar drop-shadow-md">
+                          {heroMovies[heroIndex].description}
+                        </p>
+                      )}
                     </div>
-                    <h3 className="text-3xl font-black leading-tight mb-3 tracking-tight drop-shadow-lg">{heroMovies[heroIndex].title}</h3>
-                    {heroMovies[heroIndex].description && (
-                      <p className="text-white/70 text-sm leading-relaxed mb-6 font-medium max-h-24 overflow-y-auto pr-2 custom-scrollbar drop-shadow-md">
-                        {heroMovies[heroIndex].description}
-                      </p>
-                    )}
+                    <div className="flex flex-col items-end gap-3 pb-1">
+                      <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-md text-white px-4 py-2 rounded-2xl text-sm font-black border border-white/10">
+                        <Star className="w-4 h-4 fill-white text-white" />
+                        {heroMovies[heroIndex].rating}
+                      </div>
+                      {isAdmin && (
+                        <motion.button
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(heroMovies[heroIndex].id);
+                          }}
+                          className="p-3 bg-red-500/10 text-red-400 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </motion.button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-3 pb-1">
-                    <div className="flex items-center gap-1.5 bg-white/5 backdrop-blur-md text-white px-4 py-2 rounded-2xl text-sm font-black border border-white/10">
-                      <Star className="w-4 h-4 fill-white text-white" />
-                      {heroMovies[heroIndex].rating}
-                    </div>
-                    {isAdmin && (
-                      <motion.button
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(heroMovies[heroIndex].id);
-                        }}
-                        className="p-3 bg-red-500/10 text-red-400 rounded-2xl border border-red-500/20 hover:bg-red-500/20 transition-all"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </motion.button>
-                    )}
+                  <div className="flex gap-4">
+                    <motion.a 
+                      whileHover={{ scale: 1.02, y: -4 }}
+                      whileTap={{ scale: 0.98 }}
+                      href={`https://in.bookmyshow.com/explore/movies`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-white text-[#0B0914] py-5 rounded-[2rem] font-black text-base flex items-center justify-center gap-3 shadow-xl hover:bg-gray-100 transition-all group/btn"
+                    >
+                      <Ticket className="w-6 h-6 transition-transform group-hover/btn:rotate-12" />
+                      GET TICKETS NOW
+                    </motion.a>
                   </div>
                 </div>
-                <div className="flex gap-4">
-                  <motion.a 
-                    whileHover={{ scale: 1.02, y: -4 }}
-                    whileTap={{ scale: 0.98 }}
-                    href={`https://in.bookmyshow.com/explore/movies`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-white text-[#0B0914] py-5 rounded-[2rem] font-black text-base flex items-center justify-center gap-3 shadow-xl hover:bg-gray-100 transition-all group/btn"
-                  >
-                    <Ticket className="w-6 h-6 transition-transform group-hover/btn:rotate-12" />
-                    GET TICKETS NOW
-                  </motion.a>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
         </div>
-      </div>
 
       {/* Recent Spotlights */}
       {spotlightMovies.length > 0 && (
@@ -416,6 +440,7 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
           </div>
         </motion.a>
       </motion.div>
+      </div>
     </div>
   );
 }

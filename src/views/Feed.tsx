@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { User } from 'firebase/auth';
 import { CommentBottomSheet } from '../components/CommentBottomSheet';
 import { LoginModal } from '../components/LoginModal';
+import { FeedSkeleton } from '../components/ui/FeedSkeleton';
 
 interface MovieEntry {
   id: string;
@@ -63,11 +64,7 @@ export function Feed({ user, setActiveMovieId }: { user: User | null, setActiveM
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-white/10 border-t-white rounded-full animate-spin" />
-      </div>
-    );
+    return <FeedSkeleton />;
   }
 
   const filteredMovies = movies.filter(movie => 

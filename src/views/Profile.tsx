@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { doc, getDoc, updateDoc, collection, query, where, getCountFromServer } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getCountFromServer, collectionGroup } from 'firebase/firestore';
 import { db, storage, logOut } from '../lib/firebase';
 import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -28,10 +28,11 @@ export function Profile({ user }: { user: User }) {
         // Fetch stats
         const postsCount = await getCountFromServer(query(collection(db, 'movies'), where('authorId', '==', user.uid)));
         const ratingsCount = await getCountFromServer(query(collection(db, 'ratings'), where('userId', '==', user.uid)));
+        const commentsCount = await getCountFromServer(query(collectionGroup(db, 'comments'), where('userId', '==', user.uid)));
         
         setStats({
           posts: postsCount.data().count,
-          comments: 0, // Placeholder
+          comments: commentsCount.data().count,
           ratings: ratingsCount.data().count
         });
       } catch (error) {
