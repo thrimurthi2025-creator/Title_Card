@@ -253,7 +253,7 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                       </div>
                       <h3 className="text-3xl font-heading font-extrabold leading-tight mb-3 tracking-tight text-foreground">{heroMovies[heroIndex].title}</h3>
                       {heroMovies[heroIndex].description && (
-                        <p className="text-muted-foreground text-sm leading-relaxed mb-6 font-medium max-h-24 overflow-y-auto pr-2 custom-scrollbar">
+                        <p className="text-muted-foreground text-sm leading-relaxed mb-6 font-medium line-clamp-3 pr-2">
                           {heroMovies[heroIndex].description}
                         </p>
                       )}
@@ -333,7 +333,7 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100" />
                   
-                  {/* Title Card Time Badge */}
+                      {/* Title Card Time Badge */}
                   {movie.titleCardTime && (
                     <motion.div 
                       initial={{ scale: 0.8, opacity: 0, y: 5 }}
@@ -348,7 +348,6 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                     >
                       <div className="relative group/time">
                         <div className="relative flex items-center gap-1.5 bg-white border-2 border-foreground px-3.5 py-2 rounded-full shadow-pop">
-                          <span className="text-[7px] font-black text-muted-foreground uppercase tracking-widest">Title Card</span>
                           <span className="text-[11px] font-black text-secondary tracking-wider">
                             {movie.titleCardTime}
                           </span>
@@ -358,13 +357,6 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                   )}
 
                   <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="bg-tertiary text-foreground border-2 border-foreground px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-pop">
-                        {movie.rating}
-                      </div>
-                      <p className="text-foreground text-[10px] font-bold uppercase tracking-widest bg-white px-2 py-0.5 rounded-full border-2 border-foreground">{movie.genre}</p>
-                      <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest bg-white px-2 py-0.5 rounded-full border-2 border-foreground">{movie.duration}</p>
-                    </div>
                     <h4 className="font-heading font-extrabold text-lg text-foreground leading-tight line-clamp-1 mt-2 bg-white inline-block px-2 py-1 border-2 border-foreground rounded-lg shadow-pop">{movie.title}</h4>
                   </div>
 
@@ -382,11 +374,6 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
                     </motion.button>
                   )}
                 </div>
-                {movie.description && (
-                  <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-2 px-1 group-hover:text-foreground transition-colors font-medium">
-                    {movie.description}
-                  </p>
-                )}
               </motion.div>
             ))}
           </div>

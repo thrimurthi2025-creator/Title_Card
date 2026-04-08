@@ -309,6 +309,17 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
     }
   };
 
+  const toggleFeatured = async (movie: any) => {
+    try {
+      await updateDoc(doc(db, 'movies', movie.id), {
+        isFeatured: !movie.isFeatured
+      });
+    } catch (err) {
+      console.error("Error toggling featured:", err);
+      setError("Failed to update featured status.");
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6">
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -491,35 +502,35 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Genre</label>
+                      <div className="space-y-2">
+                      <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Genre</label>
                       <input
                         type="text"
                         value={genre}
                         onChange={(e) => setGenre(e.target.value)}
-                        className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+                        className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
                         placeholder="e.g. Action, Sci-Fi"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Rating (0-10)</label>
+                      <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Rating (0-10)</label>
                       <input
                         type="number"
                         step="0.1"
                         value={rating}
                         onChange={(e) => setRating(e.target.value)}
-                        className="w-full bg-[#7A7488]/20 border-none rounded-full py-3 px-5 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all"
+                        className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
                         placeholder="8.5"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Description</label>
+                    <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Description</label>
                     <textarea
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      className="w-full bg-[#7A7488]/20 border-none rounded-3xl py-4 px-6 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all min-h-[150px]"
+                      className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all min-h-[150px] text-lg font-medium"
                       placeholder="Brief movie summary..."
                     />
                   </div>
@@ -527,17 +538,17 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Poster (Vertical)</label>
+                    <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Poster (Vertical)</label>
                     <div 
                       onClick={() => posterInputRef.current?.click()}
-                      className="w-full aspect-[2/3] bg-[#7A7488]/10 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#7A7488]/20 transition-all overflow-hidden relative"
+                      className="w-full aspect-[2/3] bg-white border-2 border-foreground rounded-xl flex flex-col items-center justify-center cursor-pointer hover:shadow-pop-hover transition-all overflow-hidden relative shadow-pop"
                     >
                       {posterImage ? (
                         <img src={posterImage} alt="Poster" className="w-full h-full object-cover" />
                       ) : (
                         <div className="flex flex-col items-center gap-2">
-                          <Layers className="w-6 h-6 text-white/20" />
-                          <span className="text-[10px] text-white/40 font-bold uppercase">Upload Poster</span>
+                          <Layers className="w-6 h-6 text-muted-foreground" strokeWidth={2.5} />
+                          <span className="text-[10px] text-muted-foreground font-bold uppercase">Upload Poster</span>
                         </div>
                       )}
                       <input type="file" ref={posterInputRef} onChange={(e) => handleImageUpload(e, 'poster')} accept="image/*" className="hidden" />
@@ -545,17 +556,17 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold tracking-wider text-[#8A94A6] uppercase ml-2">Backdrop (Horizontal)</label>
+                    <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Backdrop (Horizontal)</label>
                     <div 
                       onClick={() => backdropInputRef.current?.click()}
-                      className="w-full aspect-video bg-[#7A7488]/10 border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:bg-[#7A7488]/20 transition-all overflow-hidden relative"
+                      className="w-full aspect-video bg-white border-2 border-foreground rounded-xl flex flex-col items-center justify-center cursor-pointer hover:shadow-pop-hover transition-all overflow-hidden relative shadow-pop"
                     >
                       {backdropImage ? (
                         <img src={backdropImage} alt="Backdrop" className="w-full h-full object-cover" />
                       ) : (
                         <div className="flex flex-col items-center gap-2">
-                          <Rocket className="w-6 h-6 text-white/20" />
-                          <span className="text-[10px] text-white/40 font-bold uppercase">Upload Backdrop</span>
+                          <Rocket className="w-6 h-6 text-muted-foreground" strokeWidth={2.5} />
+                          <span className="text-[10px] text-muted-foreground font-bold uppercase">Upload Backdrop</span>
                         </div>
                       )}
                       <input type="file" ref={backdropInputRef} onChange={(e) => handleImageUpload(e, 'backdrop')} accept="image/*" className="hidden" />
@@ -639,11 +650,15 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-heading font-extrabold text-lg truncate text-foreground">{movie.title}</h4>
-                    {movie.isFeatured && (
-                      <span className="px-2 py-0.5 bg-accent text-white text-[8px] font-bold rounded-full border-2 border-foreground uppercase tracking-widest">
-                        Featured
-                      </span>
-                    )}
+                    <button
+                      onClick={() => toggleFeatured(movie)}
+                      className={cn(
+                        "px-2 py-0.5 text-[8px] font-bold rounded-full border-2 border-foreground uppercase tracking-widest transition-all",
+                        movie.isFeatured ? "bg-accent text-white" : "bg-white text-muted-foreground"
+                      )}
+                    >
+                      {movie.isFeatured ? 'Featured' : 'Not Featured'}
+                    </button>
                   </div>
                   <p className="text-xs text-muted-foreground font-bold mb-1">{movie.titleCardTime}</p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">

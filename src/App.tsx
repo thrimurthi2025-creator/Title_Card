@@ -41,7 +41,7 @@ function Navigation({ isAdmin }: { isAdmin: boolean }) {
   );
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white border-2 border-foreground shadow-pop transition-transform duration-300 overflow-hidden">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white/40 backdrop-blur-xl border border-white/30 shadow-pop transition-transform duration-300 overflow-hidden">
       <NavItem to="/" icon={<HomeIcon className="w-5 h-5" strokeWidth={2.5} />} label="HOME" active={path === '/'} />
       {!isAdmin && (
         <NavItem to="/feed" icon={<Layers className="w-5 h-5" strokeWidth={2.5} />} label="FEED" active={path === '/feed'} />
