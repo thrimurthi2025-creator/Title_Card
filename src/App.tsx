@@ -10,6 +10,9 @@ import { AdminDashboard } from './views/AdminDashboard';
 import { Theaters } from './views/Theaters';
 import { Profile } from './views/Profile';
 import { MovieDetails } from './views/MovieDetails';
+import { Privacy } from './views/Privacy';
+import { About } from './views/About';
+import { Terms } from './views/Terms';
 import { Home as HomeIcon, Layers, Shield, Map, Search, X, LogOut, User as UserIcon } from 'lucide-react';
 import { cn } from './lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
@@ -120,6 +123,15 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
                     <Link to="/profile" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
                       <UserIcon className="w-4 h-4" strokeWidth={2.5} /> Profile
                     </Link>
+                    <Link to="/privacy" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
+                      Privacy Policy
+                    </Link>
+                    <Link to="/about" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
+                      About
+                    </Link>
+                    <a href="mailto:thrimurthi2025@gmail.com" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
+                      Contact
+                    </a>
                     <button onClick={() => { logOut(); setShowMenu(false); }} className="flex items-center gap-2 p-2 text-secondary hover:bg-secondary/10 rounded-xl w-full font-bold">
                       <LogOut className="w-4 h-4" strokeWidth={2.5} /> Logout
                     </button>
@@ -180,6 +192,9 @@ function AnimatedRoutes({ user, isAdmin, setActiveMovieId }: { user: User | null
         <Route path="/movie/:id" element={<PageWrapper><MovieDetails user={user} /></PageWrapper>} />
         <Route path="/admin" element={<PageWrapper><AdminDashboard user={user} isAdmin={isAdmin} /></PageWrapper>} />
         <Route path="/nearby" element={<PageWrapper><Theaters /></PageWrapper>} />
+        <Route path="/privacy" element={<PageWrapper><Privacy /></PageWrapper>} />
+        <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
+        <Route path="/terms" element={<PageWrapper><Terms /></PageWrapper>} />
         {user && <Route path="/profile" element={<PageWrapper><Profile user={user} /></PageWrapper>} />}
       </Routes>
     </AnimatePresence>
@@ -263,6 +278,16 @@ export default function App() {
           <main className="flex-1 w-full max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-6 lg:px-8">
             <AnimatedRoutes user={user} isAdmin={isAdmin} setActiveMovieId={setActiveMovieId} />
           </main>
+
+          <footer className="py-8 text-center text-muted-foreground text-xs opacity-70">
+            <p className="mb-2">© 2026 Lumiere. Made with ♥️</p>
+            <div className="flex justify-center gap-4">
+              <Link to="/privacy">Privacy Policy</Link>
+              <Link to="/about">About</Link>
+              <Link to="/terms">Terms</Link>
+              <a href="mailto:thrimurthi2025@gmail.com">Contact</a>
+            </div>
+          </footer>
 
           <Navigation isAdmin={isAdmin} />
           <CommentBottomSheet 
