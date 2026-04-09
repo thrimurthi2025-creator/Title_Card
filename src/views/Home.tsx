@@ -182,7 +182,7 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
             </span> Again
           </h1>
           <p className="text-muted-foreground text-sm sm:text-lg font-medium tracking-wide mt-4">
-            Track cinematic moments instantly
+            Lumiere helps you never miss iconic movie title cards. Discover, track, and capture cinematic moments.
           </p>
         </motion.div>
 

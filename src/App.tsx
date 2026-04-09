@@ -5,7 +5,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, signInWithGoogle, logOut, db } from './lib/firebase';
 import { handleFirestoreError, OperationType } from './lib/firestoreUtils';
 import { Home } from './views/Home';
-import { Feed } from './views/Feed';
+import { Feed, MovieEntry } from './views/Feed';
 import { AdminDashboard } from './views/AdminDashboard';
 import { Theaters } from './views/Theaters';
 import { Profile } from './views/Profile';
@@ -13,35 +13,39 @@ import { MovieDetails } from './views/MovieDetails';
 import { Privacy } from './views/Privacy';
 import { About } from './views/About';
 import { Terms } from './views/Terms';
-import { Home as HomeIcon, Layers, Shield, Map, Search, X, LogOut, User as UserIcon } from 'lucide-react';
+import { Articles } from './views/Articles';
+import { ArticleDetail } from './views/ArticleDetail';
+import { Tracker } from './views/Tracker';
+import { Home as HomeIcon, Layers, Shield, Map, Search, X, LogOut, User as UserIcon, Clapperboard } from 'lucide-react';
 import { cn } from './lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import { LoginModal } from './components/LoginModal';
 import { CommentBottomSheet } from './components/CommentBottomSheet';
+import { FloatingTracker } from './components/FloatingTracker';
+
+const NavItem = ({ to, icon, label, active }: { to: string, icon: React.ReactNode, label: string, active: boolean }) => (
+  <Link 
+    to={to} 
+    className={cn(
+      "relative flex flex-col items-center justify-center w-20 h-16 rounded-full transition-all duration-300 z-10",
+      active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+    )}
+  >
+    {active && (
+      <motion.div
+        layoutId="nav-active-indicator"
+        className="absolute inset-0 bg-tertiary rounded-full shadow-pop -z-10 border-2 border-foreground"
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      />
+    )}
+    <div className="mb-1 relative z-10">{icon}</div>
+    <span className="text-[10px] font-bold tracking-wider relative z-10 uppercase">{label}</span>
+  </Link>
+);
 
 function Navigation({ isAdmin }: { isAdmin: boolean }) {
   const location = useLocation();
   const path = location.pathname;
-
-  const NavItem = ({ to, icon, label, active }: { to: string, icon: React.ReactNode, label: string, active: boolean }) => (
-    <Link 
-      to={to} 
-      className={cn(
-        "relative flex flex-col items-center justify-center w-20 h-16 rounded-full transition-all duration-300 z-10",
-        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-      )}
-    >
-      {active && (
-        <motion.div
-          layoutId="nav-active-indicator"
-          className="absolute inset-0 bg-tertiary rounded-full shadow-pop -z-10 border-2 border-foreground"
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        />
-      )}
-      <div className="mb-1 relative z-10">{icon}</div>
-      <span className="text-[10px] font-bold tracking-wider relative z-10 uppercase">{label}</span>
-    </Link>
-  );
 
   return (
     <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white/40 backdrop-blur-xl border border-white/30 shadow-pop transition-transform duration-300 overflow-hidden">
@@ -52,6 +56,7 @@ function Navigation({ isAdmin }: { isAdmin: boolean }) {
       {isAdmin && (
         <NavItem to="/admin" icon={<Shield className="w-5 h-5" strokeWidth={2.5} />} label="ADMIN" active={path === '/admin'} />
       )}
+      <NavItem to="/tracker" icon={<Clapperboard className="w-5 h-5" strokeWidth={2.5} />} label="TRACKER" active={path === '/tracker'} />
       <NavItem to="/nearby" icon={<Map className="w-5 h-5" strokeWidth={2.5} />} label="NEARBY" active={path === '/nearby'} />
     </nav>
   );
@@ -129,6 +134,9 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
                     <Link to="/about" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
                       About
                     </Link>
+                    <Link to="/articles" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
+                      Articles
+                    </Link>
                     <a href="mailto:thrimurthi2025@gmail.com" onClick={() => setShowMenu(false)} className="flex items-center gap-2 p-2 text-foreground hover:bg-tertiary rounded-xl font-bold">
                       Contact
                     </a>
@@ -181,20 +189,23 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-function AnimatedRoutes({ user, isAdmin, setActiveMovieId }: { user: User | null, isAdmin: boolean, setActiveMovieId: (id: string | null) => void }) {
+function AnimatedRoutes({ user, isAdmin, setActiveMovieId, selectedMovie, onSelectMovie, time, toggleTimer, resetTimer, isRunning }: { user: User | null, isAdmin: boolean, setActiveMovieId: (id: string | null) => void, selectedMovie: MovieEntry | null, onSelectMovie: (movie: MovieEntry) => void, time: number, toggleTimer: () => void, resetTimer: () => void, isRunning: boolean }) {
   const location = useLocation();
   
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<PageWrapper><Home user={user} isAdmin={isAdmin} /></PageWrapper>} />
-        <Route path="/feed" element={<PageWrapper><Feed user={user} setActiveMovieId={setActiveMovieId} /></PageWrapper>} />
+        <Route path="/feed" element={<PageWrapper><Feed user={user} setActiveMovieId={setActiveMovieId} onSelectMovie={onSelectMovie} /></PageWrapper>} />
+        <Route path="/tracker" element={<PageWrapper><Tracker selectedMovie={selectedMovie} time={time} toggleTimer={toggleTimer} resetTimer={resetTimer} isRunning={isRunning} /></PageWrapper>} />
         <Route path="/movie/:id" element={<PageWrapper><MovieDetails user={user} /></PageWrapper>} />
         <Route path="/admin" element={<PageWrapper><AdminDashboard user={user} isAdmin={isAdmin} /></PageWrapper>} />
         <Route path="/nearby" element={<PageWrapper><Theaters /></PageWrapper>} />
         <Route path="/privacy" element={<PageWrapper><Privacy /></PageWrapper>} />
         <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
         <Route path="/terms" element={<PageWrapper><Terms /></PageWrapper>} />
+        <Route path="/articles" element={<PageWrapper><Articles /></PageWrapper>} />
+        <Route path="/articles/:id" element={<PageWrapper><ArticleDetail /></PageWrapper>} />
         {user && <Route path="/profile" element={<PageWrapper><Profile user={user} /></PageWrapper>} />}
       </Routes>
     </AnimatePresence>
@@ -206,8 +217,170 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeMovieId, setActiveMovieId] = useState<string | null>(null);
-  
-  // Secret login state
+  const [selectedMovie, setSelectedMovie] = useState<MovieEntry | null>(() => {
+    const saved = localStorage.getItem('trackerState');
+    return saved ? JSON.parse(saved).selectedMovie : null;
+  });
+  const [elapsedTime, setElapsedTime] = useState(() => {
+    const saved = localStorage.getItem('trackerState');
+    return saved ? JSON.parse(saved).elapsedTime : 0;
+  });
+  const [isRunning, setIsRunning] = useState(() => {
+    const saved = localStorage.getItem('trackerState');
+    return saved ? JSON.parse(saved).isRunning : false;
+  });
+  const [startTime, setStartTime] = useState<number | null>(() => {
+    const saved = localStorage.getItem('trackerState');
+    return saved ? JSON.parse(saved).startTime : null;
+  });
+  const [now, setNow] = useState(Date.now());
+
+  const alertFlags = useRef({
+    soft: false,
+    warning: false,
+    final: false,
+    stopped: false
+  });
+  const alarmIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const playBeep = (freq: number, type: OscillatorType, duration: number) => {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtxRef.current = new AudioContextClass();
+        }
+      }
+      const ctx = audioCtxRef.current;
+      if (!ctx) return;
+      if (ctx.state === 'suspended') ctx.resume();
+      
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {
+      console.error("Audio playback failed", e);
+    }
+  };
+
+  const parseTitleCardTime = (timeStr: string) => {
+    if (!timeStr) return 0;
+    const hoursMatch = timeStr.match(/(\d+)h/);
+    const minsMatch = timeStr.match(/(\d+)m/);
+    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+    const mins = minsMatch ? parseInt(minsMatch[1]) : 0;
+    return hours * 60 + mins;
+  };
+
+  useEffect(() => {
+    localStorage.setItem('trackerState', JSON.stringify({ selectedMovie, elapsedTime, isRunning, startTime }));
+  }, [selectedMovie, elapsedTime, isRunning, startTime]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isRunning) {
+      interval = setInterval(() => {
+        setNow(Date.now()); 
+      }, 1000);
+    } else if (interval) {
+      clearInterval(interval);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (!isRunning || !selectedMovie) return;
+
+    const currentTimeInSeconds = Math.floor((elapsedTime + (Date.now() - (startTime || Date.now()))) / 1000);
+    const targetMinutes = parseTitleCardTime(selectedMovie.titleCardTime);
+    const targetSeconds = targetMinutes * 60;
+
+    if (targetSeconds === 0) return;
+
+    if (currentTimeInSeconds >= targetSeconds - 120 && currentTimeInSeconds < targetSeconds - 60 && !alertFlags.current.soft) {
+      alertFlags.current.soft = true;
+      playBeep(440, 'sine', 0.5);
+    }
+
+    if (currentTimeInSeconds >= targetSeconds - 30 && currentTimeInSeconds < targetSeconds && !alertFlags.current.warning) {
+      alertFlags.current.warning = true;
+      let count = 0;
+      const alarmInterval = setInterval(() => {
+        playBeep(660, 'square', 0.3);
+        if ('vibrate' in navigator) navigator.vibrate(200);
+        count++;
+        if (count >= 30) {
+          clearInterval(alarmInterval);
+        }
+      }, 1000);
+      alarmIntervalRef.current = alarmInterval;
+    }
+
+    if (currentTimeInSeconds >= targetSeconds && currentTimeInSeconds < targetSeconds + 60 && !alertFlags.current.final) {
+      alertFlags.current.final = true;
+      if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
+      playBeep(880, 'sawtooth', 5.0);
+      if ('vibrate' in navigator) navigator.vibrate([1000, 500, 1000, 500, 1000, 500, 1000]);
+    }
+
+    if (currentTimeInSeconds >= targetSeconds + 60 && !alertFlags.current.stopped) {
+      alertFlags.current.stopped = true;
+      setIsRunning(false);
+      if (startTime) {
+        setElapsedTime(prev => prev + (Date.now() - startTime));
+      }
+      setStartTime(null);
+    }
+  }, [now, isRunning, selectedMovie, elapsedTime, startTime]);
+
+  const toggleTimer = () => {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtxRef.current = new AudioContextClass();
+        }
+      }
+      if (audioCtxRef.current?.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+    } catch (e) {
+      console.error("Failed to initialize audio context", e);
+    }
+
+    if (isRunning) {
+      if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
+      if (startTime) {
+        setElapsedTime(prev => prev + (Date.now() - startTime));
+      }
+      setStartTime(null);
+      setIsRunning(false);
+    } else {
+      setStartTime(Date.now());
+      setNow(Date.now());
+      setIsRunning(true);
+    }
+  };
+
+  const resetTimer = () => {
+    if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
+    setElapsedTime(0);
+    setStartTime(null);
+    setIsRunning(false);
+    alertFlags.current = { soft: false, warning: false, final: false, stopped: false };
+  };
+
   const [loginClicks, setLoginClicks] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -215,7 +388,6 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Store user in Firestore on first login
         const userRef = doc(db, 'users', currentUser.uid);
         try {
           const userSnap = await getDoc(userRef);
@@ -265,18 +437,23 @@ export default function App() {
   }
 
   const isAdmin = user?.email === 'akdiljith7@gmail.com';
+  const currentTime = isRunning && startTime ? elapsedTime + (Date.now() - startTime) : elapsedTime;
 
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-background text-foreground font-sans pb-32 selection:bg-accent/20 relative overflow-x-hidden">
-        {/* Playful background with dot pattern */}
         <div className="fixed inset-0 bg-background bg-dot-pattern -z-10"></div>
         
         <div className="relative z-10 flex flex-col min-h-screen">
           <Header user={user} showAdminLogin={showAdminLogin} handleTitleClick={handleTitleClick} onLoginClick={() => setIsLoginModalOpen(true)} />
 
           <main className="flex-1 w-full max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-6 lg:px-8">
-            <AnimatedRoutes user={user} isAdmin={isAdmin} setActiveMovieId={setActiveMovieId} />
+            <AnimatedRoutes user={user} isAdmin={isAdmin} setActiveMovieId={setActiveMovieId} selectedMovie={selectedMovie} onSelectMovie={(movie) => {
+              if (selectedMovie?.id !== movie.id) {
+                resetTimer();
+              }
+              setSelectedMovie(movie);
+            }} time={Math.floor(currentTime / 1000)} toggleTimer={toggleTimer} resetTimer={resetTimer} isRunning={isRunning} />
           </main>
 
           <footer className="py-8 text-center text-muted-foreground text-xs opacity-70">
@@ -290,6 +467,7 @@ export default function App() {
           </footer>
 
           <Navigation isAdmin={isAdmin} />
+          <FloatingTracker isRunning={isRunning} time={Math.floor(currentTime / 1000)} selectedMovie={selectedMovie} />
           <CommentBottomSheet 
             isOpen={!!activeMovieId} 
             onClose={() => setActiveMovieId(null)} 
