@@ -274,11 +274,23 @@ export default function App() {
 
   const parseTitleCardTime = (timeStr: string) => {
     if (!timeStr) return 0;
+    
+    // Support HH:MM:SS or MM:SS
+    if (timeStr.includes(':')) {
+      const parts = timeStr.split(':').map(Number);
+      if (parts.length === 3) {
+        return (parts[0] * 3600) + (parts[1] * 60) + (parts[2] || 0);
+      } else if (parts.length === 2) {
+        return (parts[0] * 60) + (parts[1] || 0);
+      }
+    }
+
+    // Fallback for old format (e.g., 1h 30m) - convert to seconds
     const hoursMatch = timeStr.match(/(\d+)h/);
     const minsMatch = timeStr.match(/(\d+)m/);
     const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
     const mins = minsMatch ? parseInt(minsMatch[1]) : 0;
-    return hours * 60 + mins;
+    return (hours * 3600) + (mins * 60);
   };
 
   useEffect(() => {
@@ -303,8 +315,7 @@ export default function App() {
     if (!isRunning || !selectedMovie) return;
 
     const currentTimeInSeconds = Math.floor((elapsedTime + (Date.now() - (startTime || Date.now()))) / 1000);
-    const targetMinutes = parseTitleCardTime(selectedMovie.titleCardTime);
-    const targetSeconds = targetMinutes * 60;
+    const targetSeconds = parseTitleCardTime(selectedMovie.titleCardTime);
 
     if (targetSeconds === 0) return;
 

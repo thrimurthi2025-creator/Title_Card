@@ -61,6 +61,72 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
+function TimeSelect({ value, onChange }: { value: string, onChange: (v: string) => void }) {
+  let h = 0, m = 0, s = 0;
+  if (value) {
+    if (value.includes(':')) {
+      const parts = value.split(':').map(Number);
+      if (parts.length === 3) {
+        h = parts[0] || 0; m = parts[1] || 0; s = parts[2] || 0;
+      } else if (parts.length === 2) {
+        m = parts[0] || 0; s = parts[1] || 0;
+      }
+    } else {
+      const hoursMatch = value.match(/(\d+)h/);
+      const minsMatch = value.match(/(\d+)m/);
+      h = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+      m = minsMatch ? parseInt(minsMatch[1]) : 0;
+    }
+  }
+
+  useEffect(() => {
+    if (!value) {
+      onChange('00:00:00');
+    }
+  }, [value, onChange]);
+
+  const updateTime = (newH: number, newM: number, newS: number) => {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    if (newH > 0) {
+      onChange(`${pad(newH)}:${pad(newM)}:${pad(newS)}`);
+    } else {
+      onChange(`${pad(newM)}:${pad(newS)}`);
+    }
+  };
+
+  return (
+    <div className="flex gap-2">
+      <div className="flex-1">
+        <select 
+          value={h} 
+          onChange={(e) => updateTime(parseInt(e.target.value), m, s)}
+          className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-2 text-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium cursor-pointer"
+        >
+          {Array.from({length: 12}).map((_, i) => <option key={`h-${i}`} value={i}>{i}h</option>)}
+        </select>
+      </div>
+      <div className="flex-1">
+        <select 
+          value={m} 
+          onChange={(e) => updateTime(h, parseInt(e.target.value), s)}
+          className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-2 text-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium cursor-pointer"
+        >
+          {Array.from({length: 60}).map((_, i) => <option key={`m-${i}`} value={i}>{i}m</option>)}
+        </select>
+      </div>
+      <div className="flex-1">
+        <select 
+          value={s} 
+          onChange={(e) => updateTime(h, m, parseInt(e.target.value))}
+          className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-2 text-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium cursor-pointer"
+        >
+          {Array.from({length: 60}).map((_, i) => <option key={`s-${i}`} value={i}>{i}s</option>)}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: boolean }) {
   const [title, setTitle] = useState('');
   const [year, setYear] = useState('');
@@ -467,27 +533,14 @@ export function AdminDashboard({ user, isAdmin }: { user: User | null, isAdmin: 
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Title card</label>
-                  <input
-                    type="text"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
-                    placeholder="01:42:05"
-                    required
-                  />
+                  <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Title card (HH:MM:SS)</label>
+                  <TimeSelect value={time} onChange={setTime} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Total Duration</label>
-                <input
-                  type="text"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className="w-full bg-white border-2 border-foreground rounded-xl py-4 px-6 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent focus:shadow-pop transition-all text-lg font-medium"
-                  placeholder="e.g. 2h 43m"
-                />
+                <label className="block text-xs font-bold tracking-wider text-muted-foreground uppercase ml-2">Total Duration (HH:MM:SS)</label>
+                <TimeSelect value={duration} onChange={setDuration} />
               </div>
             </div>
           </div>

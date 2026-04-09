@@ -21,15 +21,22 @@ export function FloatingTracker({ isRunning, time, selectedMovie }: FloatingTrac
 
   const parseTitleCardTime = (timeStr: string) => {
     if (!timeStr) return 0;
+    if (timeStr.includes(':')) {
+      const parts = timeStr.split(':').map(Number);
+      if (parts.length === 3) {
+        return (parts[0] * 3600) + (parts[1] * 60) + (parts[2] || 0);
+      } else if (parts.length === 2) {
+        return (parts[0] * 60) + (parts[1] || 0);
+      }
+    }
     const hoursMatch = timeStr.match(/(\d+)h/);
     const minsMatch = timeStr.match(/(\d+)m/);
     const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
     const mins = minsMatch ? parseInt(minsMatch[1]) : 0;
-    return hours * 60 + mins;
+    return (hours * 3600) + (mins * 60);
   };
 
-  const targetMinutes = selectedMovie ? parseTitleCardTime(selectedMovie.titleCardTime) : 0;
-  const targetSeconds = targetMinutes * 60;
+  const targetSeconds = selectedMovie ? parseTitleCardTime(selectedMovie.titleCardTime) : 0;
 
   // Alert logic
   let alertClass = "";

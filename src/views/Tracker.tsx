@@ -11,15 +11,24 @@ export function Tracker({ selectedMovie, time, toggleTimer, resetTimer, isRunnin
   };
 
   const parseTitleCardTime = (timeStr: string) => {
+    if (!timeStr) return 0;
+    if (timeStr.includes(':')) {
+      const parts = timeStr.split(':').map(Number);
+      if (parts.length === 3) {
+        return (parts[0] * 3600) + (parts[1] * 60) + (parts[2] || 0);
+      } else if (parts.length === 2) {
+        return (parts[0] * 60) + (parts[1] || 0);
+      }
+    }
     const hoursMatch = timeStr.match(/(\d+)h/);
     const minsMatch = timeStr.match(/(\d+)m/);
     const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
     const mins = minsMatch ? parseInt(minsMatch[1]) : 0;
-    return hours * 60 + mins;
+    return (hours * 3600) + (mins * 60);
   };
 
-  const targetMinutes = selectedMovie ? parseTitleCardTime(selectedMovie.titleCardTime) : 0;
-  const targetSeconds = targetMinutes * 60;
+  const targetSeconds = selectedMovie ? parseTitleCardTime(selectedMovie.titleCardTime) : 0;
+  const progressPercentage = targetSeconds > 0 ? Math.min((time / targetSeconds) * 100, 100) : 0;
 
   const getAlert = () => {
     if (!selectedMovie) return null;
@@ -61,8 +70,23 @@ export function Tracker({ selectedMovie, time, toggleTimer, resetTimer, isRunnin
       </div>
 
       <div className="text-center py-8">
-        <div className="text-7xl font-mono font-black text-foreground tracking-tighter">
+        <div className="text-7xl font-mono font-black text-foreground tracking-tighter mb-6">
           {formatTime(time)}
+        </div>
+        
+        <div className="w-full h-4 bg-muted rounded-full overflow-hidden border-2 border-foreground shadow-inner relative">
+          <motion.div 
+            className={cn(
+              "h-full rounded-full transition-all duration-1000 ease-linear",
+              progressPercentage >= 100 ? "bg-accent" : "bg-foreground"
+            )}
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercentage}%` }}
+          />
+        </div>
+        <div className="flex justify-between mt-2 text-xs font-bold text-muted-foreground">
+          <span>00:00</span>
+          <span>{selectedMovie.titleCardTime}</span>
         </div>
       </div>
 
