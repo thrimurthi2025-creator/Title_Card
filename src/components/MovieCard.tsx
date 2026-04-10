@@ -69,7 +69,7 @@ export const MovieCard = React.memo(({ movie, onSelectMovie, setActiveMovieId, n
                 e.stopPropagation();
                 downloadImage(movie.image!, `${movie.title}.jpg`);
               }}
-              className="absolute top-2 right-2 p-2 bg-white border-2 border-foreground rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
+              className="absolute top-2 right-2 p-2 bg-white border-2 border-foreground rounded-full opacity-100 transition-all shadow-pop hover:shadow-pop-hover active:shadow-pop-active"
             >
               <Download className="w-5 h-5 text-foreground" strokeWidth={2.5} />
             </button>
