@@ -27,6 +27,7 @@ export function MovieDetails({ user }: { user: User | null }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (!id) return;
     const fetchMovie = async () => {
       const docRef = doc(db, 'movies', id);
