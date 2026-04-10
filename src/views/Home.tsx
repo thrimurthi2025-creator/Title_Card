@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Play, Star, Ticket, Trash2, Clock, Clapperboard, X } from 'lucide-react';
 import { MovieLoader } from '../components/MovieLoader';
 import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc } from 'firebase/firestore';
@@ -64,9 +64,15 @@ function SafeImage({ src, alt, className }: { src?: string, alt: string, classNa
   );
 }
 
-export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }) {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
+export const Home = React.memo(function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }) {
+  const [movies, setMovies] = useState<Movie[]>(() => {
+    const cached = localStorage.getItem('homeMovies');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [loading, setLoading] = useState(() => {
+    const cached = localStorage.getItem('homeMovies');
+    return cached ? false : true;
+  });
   const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
@@ -105,6 +111,9 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
   };
 
   useEffect(() => {
+    if (!localStorage.getItem('homeMovies')) {
+      setLoading(true);
+    }
     const q = query(
       collection(db, 'movies'), 
       where('isFeatured', '==', true),
@@ -130,6 +139,7 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
       });
       
       setMovies(featuredMovies);
+      localStorage.setItem('homeMovies', JSON.stringify(featuredMovies));
       setLoading(false);
     }, (error) => {
       console.error("Error fetching featured movies:", error);
@@ -409,4 +419,4 @@ export function Home({ user, isAdmin }: { user: User | null, isAdmin?: boolean }
       </div>
     </div>
   );
-}
+});

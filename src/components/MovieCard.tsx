@@ -15,11 +15,15 @@ interface MovieCardProps {
 export const MovieCard = React.memo(({ movie, onSelectMovie, setActiveMovieId, navigate, downloadImage }: MovieCardProps) => {
   return (
     <motion.div 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "50px" }}
       variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 }
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
       }}
-      className="bg-white rounded-xl p-5 border-2 border-foreground shadow-pop hover:shadow-pop-hover transition-all group"
+      className="bg-white rounded-xl p-5 border-2 border-foreground shadow-pop hover:shadow-pop-hover transition-shadow duration-300 group"
+      style={{ willChange: 'transform, opacity' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">

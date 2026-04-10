@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -355,7 +355,7 @@ export default function App() {
     }
   }, [now, isRunning, selectedMovie, elapsedTime, startTime]);
 
-  const toggleTimer = () => {
+  const toggleTimer = useCallback(() => {
     try {
       if (!audioCtxRef.current) {
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -382,15 +382,15 @@ export default function App() {
       setNow(Date.now());
       setIsRunning(true);
     }
-  };
+  }, [isRunning, startTime]);
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     if (alarmIntervalRef.current) clearInterval(alarmIntervalRef.current);
     setElapsedTime(0);
     setStartTime(null);
     setIsRunning(false);
     alertFlags.current = { soft: false, warning: false, final: false, stopped: false };
-  };
+  }, []);
 
   const [loginClicks, setLoginClicks] = useState(0);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -439,6 +439,13 @@ export default function App() {
     }, 1000);
   };
 
+  const handleSelectMovie = useCallback((movie: MovieEntry) => {
+    if (selectedMovie?.id !== movie.id) {
+      resetTimer();
+    }
+    setSelectedMovie(movie);
+  }, [selectedMovie?.id, resetTimer]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -459,12 +466,7 @@ export default function App() {
           <Header user={user} showAdminLogin={showAdminLogin} handleTitleClick={handleTitleClick} onLoginClick={() => setIsLoginModalOpen(true)} />
 
           <main className="flex-1 w-full max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-6 lg:px-8">
-            <AnimatedRoutes user={user} isAdmin={isAdmin} setActiveMovieId={setActiveMovieId} selectedMovie={selectedMovie} onSelectMovie={(movie) => {
-              if (selectedMovie?.id !== movie.id) {
-                resetTimer();
-              }
-              setSelectedMovie(movie);
-            }} time={Math.floor(currentTime / 1000)} toggleTimer={toggleTimer} resetTimer={resetTimer} isRunning={isRunning} />
+            <AnimatedRoutes user={user} isAdmin={isAdmin} setActiveMovieId={setActiveMovieId} selectedMovie={selectedMovie} onSelectMovie={handleSelectMovie} time={Math.floor(currentTime / 1000)} toggleTimer={toggleTimer} resetTimer={resetTimer} isRunning={isRunning} />
           </main>
 
           <footer className="py-8 text-center text-muted-foreground text-xs opacity-70">

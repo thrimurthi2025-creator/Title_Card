@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { SearchX, Clapperboard, MessageSquare, Download } from 'lucide-react';
@@ -26,15 +26,21 @@ export interface MovieEntry {
   whySpecial?: string;
 }
 
-export function Feed({ user, setActiveMovieId, onSelectMovie }: { user: User | null, setActiveMovieId: (id: string | null) => void, onSelectMovie: (movie: MovieEntry) => void }) {
-  const [movies, setMovies] = useState<MovieEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+export const Feed = React.memo(function Feed({ user, setActiveMovieId, onSelectMovie }: { user: User | null, setActiveMovieId: (id: string | null) => void, onSelectMovie: (movie: MovieEntry) => void }) {
+  const [movies, setMovies] = useState<MovieEntry[]>(() => {
+    const cached = localStorage.getItem('feedMovies');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [loading, setLoading] = useState(() => {
+    const cached = localStorage.getItem('feedMovies');
+    return cached ? false : true;
+  });
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
   const navigate = useNavigate();
 
-  const downloadImage = async (url: string, filename: string) => {
+  const downloadImage = useCallback(async (url: string, filename: string) => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -49,10 +55,12 @@ export function Feed({ user, setActiveMovieId, onSelectMovie }: { user: User | n
     } catch (error) {
       console.error("Error downloading image:", error);
     }
-  };
+  }, []);
 
   const fetchMovies = () => {
-    setLoading(true);
+    if (!localStorage.getItem('feedMovies')) {
+      setLoading(true);
+    }
     setError(null);
     const q = query(collection(db, 'movies'), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snapshot) => {
@@ -61,6 +69,7 @@ export function Feed({ user, setActiveMovieId, onSelectMovie }: { user: User | n
         movieData.push({ id: doc.id, ...doc.data() } as MovieEntry);
       });
       setMovies(movieData);
+      localStorage.setItem('feedMovies', JSON.stringify(movieData));
       setLoading(false);
     }, (error) => {
       console.error("Error fetching movies:", error);
@@ -111,18 +120,7 @@ export function Feed({ user, setActiveMovieId, onSelectMovie }: { user: User | n
           </p>
         </motion.div>
       ) : (
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: { staggerChildren: 0.1 }
-            }
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filteredMovies.map((movie) => (
             <MovieCard 
               key={movie.id}
@@ -133,8 +131,8 @@ export function Feed({ user, setActiveMovieId, onSelectMovie }: { user: User | n
               downloadImage={downloadImage}
             />
           ))}
-        </motion.div>
+        </div>
       )}
     </div>
   );
-}
+});

@@ -77,11 +77,12 @@ export function Tracker({ selectedMovie, time, toggleTimer, resetTimer, isRunnin
         <div className="w-full h-4 bg-muted rounded-full overflow-hidden border-2 border-foreground shadow-inner relative">
           <motion.div 
             className={cn(
-              "h-full rounded-full transition-all duration-1000 ease-linear",
+              "h-full rounded-full origin-left",
               progressPercentage >= 100 ? "bg-accent" : "bg-foreground"
             )}
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPercentage}%` }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: progressPercentage / 100 }}
+            transition={{ duration: 1, ease: "linear" }}
           />
         </div>
         <div className="flex justify-between mt-2 text-xs font-bold text-muted-foreground">
