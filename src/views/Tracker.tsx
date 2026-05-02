@@ -51,80 +51,104 @@ export function Tracker({ selectedMovie, time, toggleTimer, resetTimer, isRunnin
   }
 
   return (
-    <div className="p-6 space-y-8 max-w-md mx-auto min-h-screen">
+    <div className="p-6 space-y-8 max-w-6xl mx-auto min-h-screen">
       <div className="text-center space-y-1">
-        <h1 className="text-3xl font-heading font-extrabold text-foreground">Title Card Tracker</h1>
-        <p className="text-muted-foreground text-sm">Start your movie and track the perfect title card moment</p>
+        <h1 className="text-3xl sm:text-5xl font-heading font-extrabold text-foreground">Title Card Tracker</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">Start your movie and track the perfect title card moment</p>
       </div>
 
-      <div className="bg-white border-2 border-foreground rounded-2xl p-6 shadow-pop space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-tertiary rounded-xl flex items-center justify-center border-2 border-foreground shadow-pop">
-            <Clapperboard className="w-8 h-8 text-foreground" />
-          </div>
-          <div>
-            <h2 className="text-xl font-heading font-extrabold text-foreground">{selectedMovie.title}</h2>
-            <p className="text-muted-foreground font-bold text-sm">{selectedMovie.releaseYear} • Title Card: {selectedMovie.titleCardTime}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="text-center py-8">
-        <div className="text-7xl font-mono font-black text-foreground tracking-tighter mb-6">
-          {formatTime(time)}
-        </div>
-        
-        <div className="w-full h-4 bg-muted rounded-full overflow-hidden border-2 border-foreground shadow-inner relative">
-          <motion.div 
-            className={cn(
-              "h-full rounded-full origin-left",
-              progressPercentage >= 100 ? "bg-accent" : "bg-foreground"
-            )}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: progressPercentage / 100 }}
-            transition={{ duration: 1, ease: "linear" }}
-          />
-        </div>
-        <div className="flex justify-between mt-2 text-xs font-bold text-muted-foreground">
-          <span>00:00</span>
-          <span>{selectedMovie.titleCardTime}</span>
-        </div>
-      </div>
-
-      <div className="flex justify-center gap-4">
-        <button 
-          onClick={toggleTimer}
-          className={cn(
-            "flex items-center gap-2 px-8 py-4 rounded-full font-black text-white border-2 border-foreground shadow-pop transition-all",
-            isRunning ? "bg-secondary" : "bg-accent"
-          )}
-        >
-          {isRunning ? <><Pause className="w-5 h-5" /> Pause</> : <><Play className="w-5 h-5" /> Start Watching</>}
-        </button>
-        <button 
-          onClick={resetTimer}
-          className="flex items-center gap-2 px-6 py-4 rounded-full font-black text-foreground bg-white border-2 border-foreground shadow-pop transition-all hover:bg-muted"
-        >
-          <RotateCcw className="w-5 h-5" /> Reset
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {alert && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="bg-white border-2 border-accent p-6 rounded-2xl shadow-pop text-center relative overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-accent/10 animate-pulse"></div>
-            <div className="relative z-10 flex items-center justify-center gap-3 text-accent font-black text-lg">
-              <AlertCircle className="w-6 h-6" />
-              {alert}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div className="space-y-8">
+          <div className="bg-white border-2 border-foreground rounded-2xl p-6 shadow-pop space-y-6">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 bg-tertiary rounded-xl flex items-center justify-center border-2 border-foreground shadow-pop shrink-0">
+                <Clapperboard className="w-10 h-10 text-foreground" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-heading font-extrabold text-foreground leading-tight">{selectedMovie.title}</h2>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <span className="px-3 py-1 bg-white border-2 border-foreground text-[10px] font-black uppercase tracking-widest rounded-full">{selectedMovie.releaseYear}</span>
+                  <span className="px-3 py-1 bg-white border-2 border-foreground text-[10px] font-black uppercase tracking-widest rounded-full">{selectedMovie.totalDuration}</span>
+                </div>
+              </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            
+            <div className="space-y-2">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Expected Title Card At</p>
+              <p className="text-4xl font-black text-accent tracking-tighter">{selectedMovie.titleCardTime}</p>
+            </div>
+
+            {selectedMovie.image && (
+              <div className="aspect-video rounded-xl border-2 border-foreground overflow-hidden shadow-pop">
+                <img src={selectedMovie.image} alt={selectedMovie.title} className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+
+          <AnimatePresence>
+            {alert && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-white border-2 border-accent p-8 rounded-2xl shadow-pop text-center relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-accent/10 animate-pulse"></div>
+                <div className="relative z-10 space-y-2">
+                  <div className="flex items-center justify-center gap-3 text-accent font-black text-2xl uppercase tracking-tighter">
+                    <AlertCircle className="w-8 h-8" />
+                    {alert}
+                  </div>
+                  <p className="text-accent/70 text-xs font-bold uppercase tracking-widest">Get Ready!</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="bg-white border-2 border-foreground rounded-2xl p-8 lg:p-12 shadow-pop space-y-12">
+          <div className="text-center">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Elapsed Time</p>
+            <div className="text-8xl lg:text-9xl font-mono font-black text-foreground tracking-tighter tabular-nums mb-8 leading-none">
+              {formatTime(time)}
+            </div>
+            
+            <div className="w-full h-6 bg-muted rounded-full overflow-hidden border-2 border-foreground shadow-inner relative">
+              <motion.div 
+                className={cn(
+                  "h-full rounded-full origin-left",
+                  progressPercentage >= 100 ? "bg-accent" : "bg-foreground"
+                )}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: progressPercentage / 100 }}
+                transition={{ duration: 1, ease: "linear" }}
+              />
+            </div>
+            <div className="flex justify-between mt-3 text-xs font-black text-muted-foreground uppercase tracking-widest">
+              <span>00:00</span>
+              <span>{selectedMovie.titleCardTime}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-6">
+            <button 
+              onClick={toggleTimer}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-3 px-10 py-6 rounded-full font-black text-lg text-white border-2 border-foreground shadow-pop transition-all uppercase tracking-widest",
+                isRunning ? "bg-secondary" : "bg-accent"
+              )}
+            >
+              {isRunning ? <><Pause className="w-6 h-6" /> Pause</> : <><Play className="w-6 h-6" /> Resume</>}
+            </button>
+            <button 
+              onClick={resetTimer}
+              className="flex-1 flex items-center justify-center gap-3 px-10 py-6 rounded-full font-black text-lg text-foreground bg-white border-2 border-foreground shadow-pop transition-all hover:bg-muted uppercase tracking-widest"
+            >
+              <RotateCcw className="w-6 h-6" /> Reset
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

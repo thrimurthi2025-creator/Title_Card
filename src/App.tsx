@@ -48,7 +48,7 @@ function Navigation({ isAdmin }: { isAdmin: boolean }) {
   const path = location.pathname;
 
   return (
-    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white/40 backdrop-blur-xl border border-white/30 shadow-pop transition-transform duration-300 overflow-hidden">
+    <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-2 rounded-full bg-white/40 backdrop-blur-xl border border-white/30 shadow-pop transition-transform duration-300 overflow-hidden">
       <NavItem to="/" icon={<HomeIcon className="w-5 h-5" strokeWidth={2.5} />} label="HOME" active={path === '/'} />
       {!isAdmin && (
         <NavItem to="/feed" icon={<Layers className="w-5 h-5" strokeWidth={2.5} />} label="FEED" active={path === '/feed'} />
@@ -67,6 +67,9 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
   const [searchQuery, setSearchQuery] = useState("");
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const path = location.pathname;
+  const isAdmin = user?.email === 'akdiljith7@gmail.com';
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,17 +83,31 @@ function Header({ user, showAdminLogin, handleTitleClick, onLoginClick }: { user
   return (
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b-2 border-foreground shadow-sm">
       <div className="max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-6 py-4 flex justify-between items-center relative z-10">
-        <div className="flex items-center gap-3">
-        {!isSearchOpen && (
-          <motion.h1 
-            whileTap={{ scale: 0.95 }}
-            className="text-2xl font-heading font-extrabold tracking-tight text-foreground cursor-pointer select-none"
-            onClick={handleTitleClick}
-          >
-            Lumiere
-          </motion.h1>
-        )}
-      </div>
+        <div className="flex items-center gap-8">
+          {!isSearchOpen && (
+            <motion.h1 
+              whileTap={{ scale: 0.95 }}
+              className="text-2xl font-heading font-extrabold tracking-tight text-foreground cursor-pointer select-none"
+              onClick={handleTitleClick}
+            >
+              Lumiere
+            </motion.h1>
+          )}
+
+          {!isSearchOpen && (
+            <nav className="hidden lg:flex items-center gap-6">
+              <Link to="/" className={cn("text-[11px] font-black uppercase tracking-[0.2em] transition-colors", path === '/' ? "text-accent" : "text-foreground hover:text-accent")}>Home</Link>
+              {!isAdmin && (
+                <Link to="/feed" className={cn("text-[11px] font-black uppercase tracking-[0.2em] transition-colors", path === '/feed' ? "text-accent" : "text-foreground hover:text-accent")}>Feed</Link>
+              )}
+              {isAdmin && (
+                <Link to="/admin" className={cn("text-[11px] font-black uppercase tracking-[0.2em] transition-colors", path === '/admin' ? "text-accent" : "text-foreground hover:text-accent")}>Admin</Link>
+              )}
+              <Link to="/tracker" className={cn("text-[11px] font-black uppercase tracking-[0.2em] transition-colors", path === '/tracker' ? "text-accent" : "text-foreground hover:text-accent")}>Tracker</Link>
+              <Link to="/nearby" className={cn("text-[11px] font-black uppercase tracking-[0.2em] transition-colors", path === '/nearby' ? "text-accent" : "text-foreground hover:text-accent")}>Nearby</Link>
+            </nav>
+          )}
+        </div>
       <div className={cn("flex items-center gap-4 transition-all", isSearchOpen ? "w-full" : "")}>
         {isSearchOpen ? (
           <form onSubmit={handleSearch} className="flex items-center w-full relative animate-in fade-in slide-in-from-right-4">
@@ -459,7 +476,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-background text-foreground font-sans pb-32 selection:bg-accent/20 relative overflow-x-hidden">
+      <div className="min-h-screen bg-background text-foreground font-sans selection:bg-accent/20 relative overflow-x-hidden pb-32 lg:pb-12">
         <div className="fixed inset-0 bg-background bg-dot-pattern -z-10"></div>
         
         <div className="relative z-10 flex flex-col min-h-screen">

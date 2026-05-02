@@ -67,20 +67,31 @@ export function MovieDetails({ user }: { user: User | null }) {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
 
-        <div className="px-6 -mt-16 relative z-10">
-          <h1 className="text-3xl font-heading font-extrabold mb-3 text-foreground leading-tight">{movie.title}</h1>
-          <div className="flex gap-3 text-muted-foreground text-xs mb-6 font-bold">
-            {movie.releaseYear && <span className="bg-white px-3 py-1 rounded-full border-2 border-foreground">{movie.releaseYear}</span>}
-            {movie.totalDuration && <span className="bg-white px-3 py-1 rounded-full border-2 border-foreground">{movie.totalDuration}</span>}
-          </div>
+        <div className="px-6 -mt-16 relative z-10 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <div className="bg-white p-8 rounded-[2rem] border-2 border-foreground shadow-pop">
+                <h1 className="text-4xl sm:text-5xl font-heading font-extrabold mb-4 text-foreground leading-none tracking-tight">{movie.title}</h1>
+                <div className="flex flex-wrap gap-3 text-muted-foreground text-xs mb-8 font-black uppercase tracking-widest">
+                  {movie.releaseYear && <span className="bg-tertiary px-4 py-2 rounded-full border-2 border-foreground text-foreground">{movie.releaseYear}</span>}
+                  {movie.totalDuration && <span className="bg-quaternary px-4 py-2 rounded-full border-2 border-foreground text-foreground">{movie.totalDuration}</span>}
+                </div>
+                <div className="p-1 min-h-[100px] border-l-4 border-foreground pl-6 italic text-muted-foreground font-medium">
+                  {movie.description || "A captivating journey through cinema where every title card tells a story."}
+                </div>
+              </div>
 
-          <div className="bg-white p-6 rounded-xl border-2 border-foreground shadow-pop mb-6">
-            <h2 className="text-2xl font-heading font-bold mb-4 text-foreground">Rating</h2>
-            <Rating movieId={movie.id} user={user} onRestrictedAction={() => setIsLoginModalOpen(true)} />
-          </div>
+              <div className="bg-white p-8 rounded-[2rem] border-2 border-foreground shadow-pop">
+                <h2 className="text-3xl font-heading font-extrabold mb-6 text-foreground">Community Rating</h2>
+                <Rating movieId={movie.id} user={user} onRestrictedAction={() => setIsLoginModalOpen(true)} />
+              </div>
+            </div>
 
-          <div className="bg-white p-6 rounded-xl border-2 border-foreground shadow-pop">
-            <Comments movieId={movie.id} user={user} onRestrictedAction={() => setIsLoginModalOpen(true)} />
+            <div className="lg:col-span-1">
+              <div className="bg-white p-8 rounded-[2rem] border-2 border-foreground shadow-pop sticky top-28">
+                <Comments movieId={movie.id} user={user} onRestrictedAction={() => setIsLoginModalOpen(true)} />
+              </div>
+            </div>
           </div>
         </div>
 

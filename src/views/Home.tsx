@@ -178,7 +178,7 @@ export const Home = React.memo(function Home({ user, isAdmin }: { user: User | n
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: "easeOut", type: "spring", stiffness: 200, damping: 20 }}
-          className="max-w-2xl mx-auto text-center space-y-4 py-4 sm:py-8 relative"
+          className="max-w-2xl lg:max-w-4xl mx-auto text-center space-y-4 py-4 sm:py-8 relative"
           style={{ willChange: 'transform, opacity' }}
         >
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-tertiary rounded-full -z-10 mix-blend-multiply opacity-50 blur-3xl"></div>
@@ -253,24 +253,24 @@ export const Home = React.memo(function Home({ user, isAdmin }: { user: User | n
                   </div>
                 )}
 
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-white via-white to-transparent pt-40">
-                  <div className="flex justify-between items-end mb-4">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <p className="text-accent text-[10px] font-black tracking-[0.3em] uppercase">{heroMovies[heroIndex].genre}</p>
-                        <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
-                        <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">{heroMovies[heroIndex].duration}</p>
+                <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-12 bg-gradient-to-t from-white via-white/95 to-transparent pt-40 lg:pt-60">
+                  <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-6">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-3">
+                        <p className="text-accent text-[11px] font-black tracking-[0.3em] uppercase">{heroMovies[heroIndex].genre}</p>
+                        <span className="w-2 h-2 rounded-full bg-foreground" />
+                        <p className="text-muted-foreground text-[11px] font-bold uppercase tracking-widest">{heroMovies[heroIndex].duration}</p>
                       </div>
-                      <h3 className="text-3xl font-heading font-extrabold leading-tight mb-3 tracking-tight text-foreground">{heroMovies[heroIndex].title}</h3>
+                      <h3 className="text-4xl lg:text-6xl font-heading font-extrabold leading-tight mb-4 tracking-tighter text-foreground italic">{heroMovies[heroIndex].title}</h3>
                       {heroMovies[heroIndex].description && (
-                        <p className="text-muted-foreground text-sm leading-relaxed mb-6 font-medium line-clamp-3 pr-2">
+                        <p className="text-muted-foreground text-sm lg:text-base leading-relaxed font-medium line-clamp-3 lg:line-clamp-none lg:max-w-xl">
                           {heroMovies[heroIndex].description}
                         </p>
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-3 pb-1">
-                      <div className="flex items-center gap-1.5 bg-tertiary text-foreground px-4 py-2 rounded-full text-sm font-black border-2 border-foreground shadow-pop">
-                        <Star className="w-4 h-4 fill-foreground text-foreground" strokeWidth={2.5} />
+                    <div className="flex lg:flex-col items-center lg:items-end gap-3 shrink-0">
+                      <div className="flex items-center gap-2 bg-tertiary text-foreground px-6 py-3 rounded-full text-lg font-black border-2 border-foreground shadow-pop">
+                        <Star className="w-5 h-5 fill-foreground text-foreground" strokeWidth={2.5} />
                         {heroMovies[heroIndex].rating}
                       </div>
                       {isAdmin && (
@@ -281,9 +281,9 @@ export const Home = React.memo(function Home({ user, isAdmin }: { user: User | n
                             e.stopPropagation();
                             handleDelete(heroMovies[heroIndex].id);
                           }}
-                          className="p-3 bg-white text-secondary rounded-full border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all"
+                          className="p-4 bg-white text-secondary rounded-full border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all"
                         >
-                          <Trash2 className="w-5 h-5" strokeWidth={2.5} />
+                          <Trash2 className="w-6 h-6" strokeWidth={2.5} />
                         </motion.button>
                       )}
                     </div>
@@ -325,11 +325,11 @@ export const Home = React.memo(function Home({ user, isAdmin }: { user: User | n
               See All
             </button>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-6 snap-x hide-scrollbar scroll-smooth scroll-px-4 -mx-4 px-4">
+          <div className="flex lg:grid lg:grid-cols-3 gap-6 overflow-x-auto lg:overflow-x-visible pb-6 lg:pb-0 snap-x lg:snap-none hide-scrollbar scroll-smooth scroll-px-4 -mx-4 px-4 lg:mx-0 lg:px-0">
             {spotlightMovies.map((movie, idx) => (
               <motion.div 
                 key={movie.id} 
-                className="min-w-[280px] sm:min-w-[350px] lg:min-w-[400px] snap-start group"
+                className="min-w-[280px] sm:min-w-[350px] lg:min-w-full lg:w-full snap-start group"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 + Math.min(idx, 5) * 0.1 }}
