@@ -26,37 +26,39 @@ export const MovieCard = React.memo(({ movie, onSelectMovie, setActiveMovieId, n
       style={{ willChange: 'transform, opacity' }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center text-foreground font-bold text-sm overflow-hidden shadow-pop border-2 border-foreground">
+      <div className="flex items-center justify-between gap-2 mb-4 w-full">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-10 h-10 rounded-full bg-tertiary flex items-center justify-center text-foreground font-bold text-sm overflow-hidden shadow-pop border-2 border-foreground shrink-0">
             {movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? (
               <Clapperboard className="w-5 h-5 text-foreground" strokeWidth={2.5} />
             ) : (
               movie.authorName.charAt(0).toUpperCase()
             )}
           </div>
-          <div>
-            <p className="font-bold text-sm text-foreground">@{movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? 'cinephile' : movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-sm text-foreground truncate">@{movie.authorName.toLowerCase().includes('diljith') || movie.authorName.toLowerCase().includes('cinephile') || movie.authorName.toLowerCase() === 'admin' ? 'cinephile' : movie.authorName.toLowerCase().replace(/\s+/g, '_')}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold truncate">
               {formatDistanceToNow(new Date(movie.createdAt)).toUpperCase()} AGO
             </p>
           </div>
         </div>
-        <button 
-          onClick={() => {
-            onSelectMovie(movie);
-            navigate('/tracker');
-          }}
-          className="p-2 bg-accent text-white rounded-full border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all"
-        >
-          <Clapperboard className="w-5 h-5" strokeWidth={2.5} />
-        </button>
-        <button 
-          onClick={() => setActiveMovieId(movie.id)}
-          className="p-2 bg-white rounded-full border-2 border-transparent hover:border-foreground hover:shadow-pop active:shadow-pop-active transition-all"
-        >
-          <MessageSquare className="w-5 h-5 text-foreground" strokeWidth={2.5} />
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button 
+            onClick={() => {
+              onSelectMovie(movie);
+              navigate('/tracker');
+            }}
+            className="p-2 bg-accent text-white rounded-full border-2 border-foreground shadow-pop hover:shadow-pop-hover active:shadow-pop-active transition-all"
+          >
+            <Clapperboard className="w-4 h-4" strokeWidth={2.5} />
+          </button>
+          <button 
+            onClick={() => setActiveMovieId(movie.id)}
+            className="p-2 bg-white rounded-full border-2 border-transparent hover:border-foreground hover:shadow-pop active:shadow-pop-active transition-all"
+          >
+            <MessageSquare className="w-4 h-4 text-foreground" strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
 
       {/* Image */}
@@ -81,10 +83,10 @@ export const MovieCard = React.memo(({ movie, onSelectMovie, setActiveMovieId, n
 
       {/* Details */}
       <div onClick={() => navigate(`/movie/${movie.id}`)} className="cursor-pointer">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="text-xl font-heading font-extrabold uppercase tracking-wide text-foreground">{movie.title}</h3>
+        <div className="flex items-start justify-between gap-3 mb-2 w-full">
+          <h3 className="text-xl font-heading font-extrabold uppercase tracking-wide text-foreground flex-1 min-w-0 break-words">{movie.title}</h3>
           {movie.releaseYear && (
-            <span className="px-3 py-1 bg-white text-foreground text-xs font-bold rounded-full border-2 border-foreground shadow-pop">
+            <span className="shrink-0 px-3 py-1 bg-white text-foreground text-xs font-bold rounded-full border-2 border-foreground shadow-pop mt-0.5">
               {movie.releaseYear}
             </span>
           )}
